@@ -1,0 +1,26 @@
+# SGC - Git Ignore Rules
+node_modules/
+.env
+dist/
+build/
+logs/
+*.log
+
+# Database
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
+backend/prisma/prisma/
+
+# System-level
+.DS_Store
+.idea/
+.vscode/
+
+# Ignore package-lock to avoid conflicts in this environment
+package-lock.json
+backend/package-lock.json
+frontend/package-lock.json
+
+# Local / Temp files
+local_files/
+*.pid
