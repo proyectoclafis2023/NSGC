@@ -21,6 +21,11 @@ const app = express();
 const upload = multer({ dest: 'uploads/' });
 const PORT = process.env.PORT || 3001;
 
+app.use((req, res, next) => {
+    console.log(`[API] ${req.method} ${req.url}`);
+    next();
+});
+
 // Configuración de Email (Ejemplo con Gmail o SMTP genérico)
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -59,7 +64,7 @@ const authorize = (permissions) => {
 // --- PRODUCTION SECURITY (Phase 1, 3, 4) ---
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
-    max: process.env.NODE_ENV === 'development' ? 10000 : 100, 
+    max: 100000, // Desactivado virtualmente para desarrollo
     message: { error: 'Límite de peticiones excedido, intente en 15 minutos' }
 });
 app.use('/api/', apiLimiter);
@@ -68,7 +73,10 @@ const authenticate = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = (authHeader && authHeader.split(' ')[1]) || req.query.token;
 
-    if (!token) return res.status(401).json({ error: 'Autenticación requerida' });
+    if (!token) {
+        console.warn(`[AUTH] Missing token for ${req.method} ${req.url}`);
+        return res.status(401).json({ error: 'Autenticación requerida' });
+    }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'sgc_prod_secret');
@@ -77,10 +85,14 @@ const authenticate = async (req, res, next) => {
             include: { roleRef: { include: { permissions: { include: { permission: true } } } } }
         });
 
-        if (!user || user.isArchived) return res.status(401).json({ error: 'Acceso denegado' });
+        if (!user || user.isArchived) {
+            console.warn(`[AUTH] Invalid or archived user: ${decoded.userId}`);
+            return res.status(401).json({ error: 'Acceso denegado' });
+        }
 
         req.user = user;
         req.isAdmin = (user.roleRef?.name === 'Administrador' || user.roleRef?.name === 'admin');
+        console.log(`[AUTH] Success: ${user.email} (Admin: ${req.isAdmin})`);
 
         let relatedId = user.id;
         if (user.roleRef?.name === 'resident') {
@@ -94,7 +106,8 @@ const authenticate = async (req, res, next) => {
 
         next();
     } catch (err) {
-        return res.status(401).json({ error: 'Sesión inválida o expirada' });
+        console.error(`[AUTH] JWT Error: ${err.message}`);
+        return res.status(403).json({ error: 'Sesión inválida o expirada' });
     }
 };
 
@@ -2269,9 +2282,13 @@ app.get('/api/reporte_diario', authorize('reports:view'), async (req, res) => {
 
 app.post('/api/reporte_diario', authorize('reports:view'), requestMapper('reporte_diario'), async (req, res) => {
     try {
+        console.log('[DEBUG] Creating DailyReport with body:', JSON.stringify(req.body));
         const data = await prisma.dailyReport.create({ data: req.body });
         res.status(201).json(mapResponse('reporte_diario', data));
-    } catch (err) { res.status(400).json({ error: err.message }); }
+    } catch (err) { 
+        console.error('[ERROR] Error creating DailyReport:', err.message);
+        res.status(400).json({ error: err.message }); 
+    }
 });
 
 app.put('/api/reporte_diario/:id', authorize('reports:view'), requestMapper('reporte_diario'), async (req, res) => {

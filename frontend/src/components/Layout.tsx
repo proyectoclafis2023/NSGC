@@ -127,9 +127,9 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon: Icon, label, isCollapsed, c
                     onClick={() => setIsOpen(!isOpen)}
                     className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
                 >
-                    <Icon className="w-5 h-5 shrink-0" />
-                    <span className="flex-1 text-left text-[13px] uppercase tracking-[0.2em] font-black">{label}</span>
-                    {isOpen ? <ChevronDown className="w-4 h-4 shrink-0 transition-transform" /> : <ChevronRight className="w-4 h-4 shrink-0 transition-transform text-gray-400" />}
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="flex-1 text-left text-[11px] uppercase tracking-[0.15em] font-bold">{label}</span>
+                    {isOpen ? <ChevronDown className="w-3 h-3 shrink-0 transition-transform" /> : <ChevronRight className="w-3 h-3 shrink-0 transition-transform text-gray-400" />}
                 </button>
                 {isOpen && (
                     <div className="ml-9 border-l-2 border-indigo-100 dark:border-indigo-900/30 pl-2 space-y-1 animate-in slide-in-from-top-2 duration-200">
@@ -192,8 +192,8 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon: Icon, label, isCollapsed, c
                 className={({ isActive }) => `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
                 title={isCollapsed ? label : ""}
             >
-                <Icon className="w-5 h-5 shrink-0" />
-                {!isCollapsed && <span className="text-[13px] uppercase tracking-[0.2em] font-black">{label}</span>}
+                <Icon className="w-4 h-4 shrink-0" />
+                {!isCollapsed && <span className="text-[11px] uppercase tracking-[0.15em] font-bold">{label}</span>}
             </NavLink>
         );
     }
@@ -229,27 +229,27 @@ export const Layout: React.FC = () => {
 
             {/* Sidebar */}
             <aside className={`
-                ${isCollapsed ? 'w-20' : 'w-72'} 
+                ${isCollapsed ? 'w-16' : 'w-64'} 
                 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
                 bg-[var(--sidebar-bg)] border-[var(--border-color)] text-[var(--text-primary)]
                 border-r flex flex-col fixed md:sticky top-0 h-screen transition-all duration-500 z-50 
                 shadow-2xl shadow-gray-200/20 dark:shadow-none
             `}>
-                <div className={`p-8 border-b border-gray-50 dark:border-gray-800 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} relative`}>
-                    <div className={`flex items-center ${isCollapsed ? 'hidden' : 'space-x-3 animate-in fade-in duration-500'}`}>
+                <div className={`p-6 border-b border-gray-50 dark:border-gray-800 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} relative`}>
+                    <div className={`flex items-center ${isCollapsed ? 'hidden' : 'space-x-2 animate-in fade-in duration-500'}`}>
                         {settings.systemLogo ? (
-                            <img src={settings.systemLogo} alt="Logo" className="h-8 w-auto object-contain" />
+                            <img src={settings.systemLogo} alt="Logo" className="h-6 w-auto object-contain" />
                         ) : (
-                            <div className="w-10 h-10 bg-indigo-600 rounded-[1.25rem] flex items-center justify-center transform -rotate-3 transition-transform shadow-xl shadow-indigo-500/20 text-white font-black text-xl shrink-0">
+                            <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center transform -rotate-3 transition-transform shadow-xl shadow-indigo-500/20 text-white font-black text-lg shrink-0">
                                 {settings.systemIcon}
                             </div>
                         )}
-                        <span className="text-[14px] font-black text-gray-900 dark:text-white tracking-widest uppercase leading-tight">
-                            SGC - SISTEMA DE GESTIÓN DE CONDOMINIOS
+                        <span className="text-[11px] font-black text-gray-900 dark:text-white tracking-widest uppercase leading-tight">
+                            SGC - GESTIÓN
                         </span>
                     </div>
                     {isCollapsed && (
-                        <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-bold text-xl shrink-0">
+                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-bold text-lg shrink-0">
                             S
                         </div>
                     )}
@@ -429,38 +429,38 @@ export const Layout: React.FC = () => {
 
             {/* Main Content */}
             <main className="flex-1 overflow-auto flex flex-col">
-                <header className={`h-20 backdrop-blur-xl border-b flex items-center justify-between px-8 sticky top-0 z-20 bg-[var(--header-bg)] border-[var(--border-color)] shadow-sm`}>
+                <header className={`h-16 backdrop-blur-xl border-b flex items-center justify-between px-6 sticky top-0 z-20 bg-[var(--header-bg)] border-[var(--border-color)] shadow-sm`}>
                     <div className="flex items-center gap-4">
                         <button
                             className="md:hidden p-2 -ml-2 text-gray-400 hover:text-indigo-600 transition-colors"
                             onClick={() => setIsMobileMenuOpen(true)}
                         >
-                            <Menu className="w-6 h-6" />
+                            <Menu className="w-5 h-5" />
                         </button>
                         <button
                             onClick={() => setIsCollapsed(!isCollapsed)}
-                            className="hidden md:flex p-2 text-gray-400 hover:text-indigo-600 transition-colors bg-[var(--app-bg)] rounded-xl border border-[var(--border-color)]"
+                            className="hidden md:flex p-2 text-gray-400 hover:text-indigo-600 transition-colors bg-[var(--app-bg)] rounded-lg border border-[var(--border-color)]"
                         >
-                            <Menu className="w-5 h-5" />
+                            <Menu className="w-4 h-4" />
                         </button>
-                        <span className={`hidden lg:block font-black text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]`}>SGC - Sistema de Gestión de Condominios</span>
+                        <span className={`hidden lg:block font-bold text-[9px] uppercase tracking-[0.2em] text-[var(--text-secondary)]`}>SGC - Sistema de Gestión de Condominios</span>
                     </div>
 
                     <div className="flex items-center gap-4">
 
                         <button
                             onClick={toggleTheme}
-                            className="p-3 rounded-2xl text-gray-400 border border-[var(--border-color)] hover:text-indigo-600 hover:bg-[var(--card-bg)] hover:shadow-lg transition-all duration-300 flex items-center gap-2"
+                            className="p-2 rounded-xl text-gray-400 border border-[var(--border-color)] hover:text-indigo-600 hover:bg-[var(--card-bg)] hover:shadow-lg transition-all duration-300 flex items-center gap-2"
                         >
-                            {settings.theme === 'dark' ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5 text-indigo-600" />}
+                            {settings.theme === 'dark' ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-indigo-600" />}
                         </button>
-                        <div className="lg:hidden w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black">
+                        <div className="lg:hidden w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-sm">
                             {user?.name?.charAt(0)}
                         </div>
                     </div>
                 </header>
 
-                <div className="p-10 max-w-[1600px] w-full mx-auto flex-1">
+                <div className="p-6 lg:p-8 max-w-[1600px] w-full mx-auto flex-1">
                     <EmergencyTicker />
                     <Outlet />
                 </div>

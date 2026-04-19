@@ -22,7 +22,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 )}
                 <input
                     className={cn(
-                        "flex h-11 w-full rounded-xl border transition-all duration-200 text-sm",
+                        "flex h-9 w-full rounded-lg border transition-all duration-200 text-[13px] px-3",
                         "bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700",
                         "placeholder:text-gray-400 dark:placeholder:text-gray-500",
                         "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-500/10 focus-visible:border-indigo-500",

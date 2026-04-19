@@ -67,8 +67,8 @@ export const LoginPage: React.FC = () => {
                 <div className="absolute -bottom-[30%] -right-[10%] w-[70%] h-[70%] rounded-full bg-indigo-200/30 dark:bg-indigo-900/10 blur-[100px]" />
             </div>
 
-            <div className="relative z-10 w-full max-w-md p-6">
-                <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 dark:border-gray-800 p-8">
+            <div className="relative z-10 w-full max-w-sm p-4">
+                <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 dark:border-gray-800 p-6">
                     <div className="flex flex-col items-center mb-8">
                         {settings.systemLogo ? (
                             <img src={settings.systemLogo} alt="Logo" className="h-16 w-auto object-contain mb-4 drop-shadow-md" />
@@ -77,7 +77,7 @@ export const LoginPage: React.FC = () => {
                                 {settings.systemIcon}
                             </div>
                         )}
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-center">{settings.system_name}</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center">{settings.system_name}</h1>
                         <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">Por favor, inicia sesión para continuar</p>
                     </div>
 
@@ -106,7 +106,7 @@ export const LoginPage: React.FC = () => {
                             </div>
                         )}
 
-                        <Button type="submit" className="w-full text-lg py-3" isLoading={loading}>
+                        <Button type="submit" className="w-full text-sm h-10" isLoading={loading}>
                             Iniciar Sesión
                         </Button>
                     </form>
@@ -124,9 +124,9 @@ export const LoginPage: React.FC = () => {
                         type="button"
                         onClick={handleGoogleLogin}
                         disabled={loading}
-                        className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition font-bold shadow-sm"
+                        className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-xl text-[12px] text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition font-bold shadow-sm"
                     >
-                        <Mail className="w-5 h-5 text-red-500" />
+                        <Mail className="w-4 h-4 text-red-500" />
                         Acceder con Google
                     </button>
 

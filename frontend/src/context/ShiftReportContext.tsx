@@ -43,15 +43,31 @@ export const ShiftReportProvider: React.FC<{ children: ReactNode }> = ({ childre
         };
 
         try {
+            console.log('[DEBUG] Sending report to API:', newRecord);
+            const token = localStorage.getItem('token');
+            if (!token) console.warn('[WARN] No token found in localStorage');
+
             const response = await fetch(`${API_BASE_URL}/reporte_diario`, {
                 method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' },
+                headers: { 
+                    'Authorization': 'Bearer ' + token, 
+                    'Content-Type': 'application/json' 
+                },
                 body: JSON.stringify(newRecord)
             });
+
+            console.log('[DEBUG] API Response status:', response.status);
+
             if (response.ok) {
-                await fetchReports();
+                // Actualizamos el estado local inmediatamente para que la UI responda rápido
+                setReports(prev => [newRecord, ...prev]);
+                // Luego refrescamos del servidor para asegurar consistencia
+                fetchReports();
                 return true;
             }
+            
+            const errorData = await response.json().catch(() => ({}));
+            console.error('[ERROR] API error details:', errorData);
             return false;
         } catch (e) {
             console.error('API Error adding shift report:', e);

@@ -32,6 +32,7 @@ export const ShiftReportsPage: React.FC = () => {
     const [reopenReason, setReopenReason] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState<{ id: string, folio: string } | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
 
     // Form fields for report
     const [shift_type, setShiftType] = useState<'Manana' | 'Tarde' | 'Noche'>('Manana');
@@ -52,27 +53,27 @@ export const ShiftReportsPage: React.FC = () => {
     const todayStr = new Date().toISOString().split('T')[0];
     const activeReport = reports.find((r: ShiftReport) => r.concierge_id === user?.id && r.shift_date === todayStr && r.status === 'open');
 
-    const getCurrentShift = () => {
+    const getShiftType = () => {
         const hour = new Date().getHours();
         if (hour >= 7 && hour < 15) return 'Manana';
         if (hour >= 15 && hour < 23) return 'Tarde';
-        return 'Noche';
+        if (hour >= 23 || hour < 7) return 'Noche';
+        return 'Fuera de Horario';
     };
 
     useEffect(() => {
         if (user?.relatedId && !activeReport) {
             const currentPersonnel = personnel.find((p: Personnel) => p.id === user.relatedId);
             if (currentPersonnel?.assigned_shift) {
-                // Normalize 'Mañana' or any variation to 'Manana'
                 const normalized = currentPersonnel.assigned_shift.includes('Ma') ? 'Manana' : currentPersonnel.assigned_shift;
                 if (['Manana', 'Tarde', 'Noche'].includes(normalized)) {
                     setShiftType(normalized as 'Manana' | 'Tarde' | 'Noche');
                 }
             } else {
-                setShiftType(getCurrentShift());
+                setShiftType(getShiftType() as 'Manana' | 'Tarde' | 'Noche');
             }
         } else if (!activeReport) {
-            setShiftType(getCurrentShift());
+            setShiftType(getShiftType() as 'Manana' | 'Tarde' | 'Noche');
         }
     }, [user, personnel, activeReport]);
 
@@ -120,24 +121,14 @@ export const ShiftReportsPage: React.FC = () => {
     }, [activeReport]);
 
     const handleStartShift = async () => {
-        const current = getCurrentShift();
-        const existing = reports.find((r: ShiftReport) => 
-            r.concierge_id === user?.id && 
-            r.shift_date === todayStr && 
-            r.shift_type === current
-        );
-
-        if (existing) {
-            if (existing.status === 'closed') {
-                alert(`Ya existe un reporte finalizado para la jornada de ${current} de hoy. No se pueden duplicar los reportes por jornada.`);
-                return;
-            }
-            // Si está abierto, simplemente abrimos el modal
-            setIsModalOpen(true);
+        const current = getShiftType();
+        if (current === 'Fuera de Horario') {
+            alert('No puedes iniciar un reporte fuera de los horarios de turno establecidos.');
             return;
         }
 
-        await addReport({
+        setIsCreating(true);
+        const success = await addReport({
             concierge_id: user?.id || 'unknown',
             concierge_name: user?.name || 'Usuario',
             shift_date: todayStr,
@@ -145,9 +136,12 @@ export const ShiftReportsPage: React.FC = () => {
             novedades: ''
         });
 
-        // El modal se abrirá automáticamente vía useEffect cuando activeReport cambie, 
-        // pero lo forzamos aquí también para una respuesta inmediata.
-        setIsModalOpen(true);
+        setIsCreating(false);
+        if (success) {
+            setIsModalOpen(true);
+        } else {
+            alert('Hubo un error al iniciar el reporte. Por favor, intente nuevamente.');
+        }
     };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
@@ -180,7 +174,6 @@ export const ShiftReportsPage: React.FC = () => {
                 equipment_attachments
             });
 
-            // Artificial delay to show "Saved" state since storage is instant
             setTimeout(() => {
                 setIsSaving(false);
             }, 2000);
@@ -212,7 +205,6 @@ export const ShiftReportsPage: React.FC = () => {
                 equipment_attachments
             });
             
-            // Register Ticket / KPI
             await addTicket({
                 resident_id: user?.id || 'system',
                 type: 'shift_report',
@@ -256,7 +248,7 @@ export const ShiftReportsPage: React.FC = () => {
     }).sort((a: ShiftReport, b: ShiftReport) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     const todayReports = reports.filter((r: ShiftReport) => r.shift_date === todayStr);
-    const currentShiftType = getCurrentShift();
+    const currentShiftType = getShiftType();
     const hasClosedCurrentShift = todayReports.some((r: ShiftReport) => r.shift_type === currentShiftType && r.status === 'closed');
 
     const AttachmentSection = ({ title, attachments, setter }: { title: string, attachments: string[], setter: React.Dispatch<React.SetStateAction<string[]>> }) => (
@@ -297,22 +289,29 @@ export const ShiftReportsPage: React.FC = () => {
     };
 
     return (
-        <div className="p-4 sm:p-8 space-y-8 animate-in fade-in duration-700">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-8 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+        <div className="p-4 sm:p-6 space-y-6 animate-in fade-in duration-700">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
                 <div>
-                    <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
-                        <ClipboardList className="w-10 h-10 text-indigo-600" />
+                    <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
+                        <ClipboardList className="w-8 h-8 text-indigo-600" />
                         Bitácora Turnos
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400 font-bold mt-1 ml-1 text-sm uppercase tracking-widest">Control Operativo y Novedades de Jornada</p>
+                    <p className="text-gray-500 dark:text-gray-400 font-bold mt-1 ml-1 text-[10px] uppercase tracking-widest">Control Operativo y Novedades de Jornada</p>
                 </div>
                 <div className="flex gap-2">
                     {!activeReport ? (
-                        <Button onClick={handleStartShift}>
-                            <Plus className="w-4 h-4 mr-2" /> Reporte de Turno
+                        <Button onClick={handleStartShift} size="md" disabled={isCreating}>
+                            {isCreating ? (
+                                <div className="flex items-center">
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin mr-2 rounded-full" />
+                                    Iniciando...
+                                </div>
+                            ) : (
+                                <><Plus className="w-4 h-4 mr-2" /> Reporte de Turno</>
+                            )}
                         </Button>
                     ) : (
-                        <Button onClick={() => { setIsModalOpen(true); }} className="bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-600/20">
+                        <Button onClick={() => { setIsModalOpen(true); }} size="md" className="bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-600/20">
                             <CheckCircle2 className="w-4 h-4 mr-2" /> Finalizar y Cerrar Turno
                         </Button>
                     )}
@@ -320,36 +319,36 @@ export const ShiftReportsPage: React.FC = () => {
             </div>
 
             {hasClosedCurrentShift && !activeReport && (
-                <div className="bg-rose-50/50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/20 p-8 rounded-[3rem] text-rose-700 dark:text-rose-400 flex items-center gap-6 shadow-sm ring-1 ring-rose-100 dark:ring-rose-900/10">
-                    <div className="w-16 h-16 bg-rose-500 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-rose-500/30 shrink-0">
-                        <ShieldAlert className="w-8 h-8" />
+                <div className="bg-rose-50/50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/20 p-6 rounded-3xl text-rose-700 dark:text-rose-400 flex items-center gap-4 shadow-sm ring-1 ring-rose-100 dark:ring-rose-900/10">
+                    <div className="w-12 h-12 bg-rose-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-rose-500/30 shrink-0">
+                        <ShieldAlert className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-sm font-black uppercase tracking-widest">Reporte Diario Finalizado</p>
-                        <p className="text-xs font-bold opacity-80">Ya has enviado tu consolidado del día de hoy para esta jornada. No es necesario iniciar uno nuevo a menos que sea un turno diferente.</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest">Reporte Diario Finalizado</p>
+                        <p className="text-[11px] font-bold opacity-80">Ya has enviado tu consolidado del día de hoy para esta jornada. No es necesario iniciar uno nuevo a menos que sea un turno diferente.</p>
                     </div>
                 </div>
             )}
 
             {activeReport && (
-                <div className="bg-indigo-600 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-indigo-500/30 relative overflow-hidden group">
-                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-6">
-                            <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-[2.5rem] flex items-center justify-center shadow-inner shadow-white/20 border border-white/20">
-                                <User className="w-10 h-10" />
+                <div className="bg-indigo-600 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden group">
+                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner shadow-white/20 border border-white/20">
+                                <User className="w-7 h-7" />
                             </div>
                             <div>
-                                 <p className="text-xs font-black uppercase tracking-widest text-indigo-100 mb-1 opacity-80">Conserje en Turno</p>
-                                <h2 className="text-3xl font-black leading-none">{user?.name}</h2>
-                                <p className="text-xs font-bold text-indigo-200 mt-2 uppercase tracking-widest flex items-center gap-2 bg-white/10 w-fit px-3 py-1 rounded-full border border-white/10">
-                                    <Calendar className="w-3.5 h-3.5" /> {new Date(activeReport.shift_date).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}
+                                 <p className="text-[9px] font-black uppercase tracking-widest text-indigo-100 mb-0.5 opacity-80">Conserje en Turno</p>
+                                <h2 className="text-xl font-black leading-none">{user?.name}</h2>
+                                <p className="text-[9px] font-bold text-indigo-200 mt-1.5 uppercase tracking-widest flex items-center gap-2 bg-white/10 w-fit px-2 py-0.5 rounded-full border border-white/10">
+                                    <Calendar className="w-3 h-3" /> {new Date(activeReport.shift_date).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}
                                 </p>
                             </div>
                         </div>
-                        <div className="bg-white/10 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/20 flex flex-col items-center shadow-lg">
-                            <p className="text-[10px] font-black uppercase text-indigo-100 mb-2 opacity-70">Estado</p>
-                            <span className="flex items-center gap-2 px-6 py-2 bg-emerald-500 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/30">
-                                <div className="w-2 h-2 bg-white rounded-full" />
+                        <div className="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/20 flex flex-col items-center shadow-lg">
+                            <p className="text-[8px] font-black uppercase text-indigo-100 mb-1 opacity-70">Estado</p>
+                            <span className="flex items-center gap-2 px-3 py-1 bg-emerald-500 rounded-full text-[8px] font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/30">
+                                <div className="w-1.5 h-1.5 bg-white rounded-full" />
                                 Turno en Curso
                             </span>
                         </div>
@@ -369,18 +368,18 @@ export const ShiftReportsPage: React.FC = () => {
                         const isReported = info.status === 'closed';
 
                         return (
-                            <div key={type} className={`p-6 rounded-[2.5rem] border-2 transition-all ${info.bgColor} ${info.status === 'pending' ? 'border-dashed' : 'border-solid'} border-opacity-30 shadow-sm flex items-center justify-between group`}>
-                                <div className="flex items-center gap-4">
-                                    <div className={`p-4 rounded-2xl transition-transform group-hover:scale-110 ${info.iconColor} text-white shadow-lg`}>
-                                        <Zap className={`w-5 h-5 ${type === 'Tarde' ? 'rotate-45' : type === 'Noche' ? 'rotate-90' : ''}`} />
+                            <div key={type} className={`p-4 rounded-2xl border transition-all ${info.bgColor} ${info.status === 'pending' ? 'border-dashed' : 'border-solid'} border-opacity-30 shadow-sm flex items-center justify-between group`}>
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2.5 rounded-xl transition-transform group-hover:scale-105 ${info.iconColor} text-white shadow-md`}>
+                                        <Zap className={`w-4 h-4 ${type === 'Tarde' ? 'rotate-45' : type === 'Noche' ? 'rotate-90' : ''}`} />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Jornada {type}</p>
+                                        <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Jornada {type}</p>
                                         <div className="flex flex-col">
-                                            <p className={`text-sm font-black ${info.color}`}>
+                                            <p className={`text-[11px] font-black ${info.color}`}>
                                                 {info.label}
                                             </p>
-                                            <p className="text-[9px] font-bold text-gray-400 uppercase italic">{info.subLabel}</p>
+                                            <p className="text-[8px] font-bold text-gray-400 uppercase italic">{info.subLabel}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -390,20 +389,20 @@ export const ShiftReportsPage: React.FC = () => {
                                             <button
                                                 type="button"
                                                 onClick={(e) => confirmDelete(e, info.report.id, info.report.folio)}
-                                                className="p-2.5 bg-rose-50 text-rose-500 hover:bg-rose-100 dark:bg-rose-900/20 rounded-xl transition-all border border-rose-100 dark:border-rose-900/30 shadow-sm"
+                                                className="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 dark:bg-rose-900/20 rounded-lg transition-all border border-rose-100 dark:border-rose-900/30 shadow-sm"
                                                 title="Eliminar Reporte"
                                             >
-                                                <Trash2 className="w-4 h-4" />
+                                                <Trash2 className="w-3.5 h-3.5" />
                                             </button>
                                         )}
                                         {isReported ? (
-                                            <CheckCircle2 className="w-6 h-6 text-emerald-500 drop-shadow-md" />
+                                            <CheckCircle2 className="w-5 h-5 text-emerald-500 drop-shadow-md" />
                                         ) : (
-                                            <div className="w-6 h-6 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin" />
+                                            <div className="w-5 h-5 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
                                         )}
                                     </div>
                                 ) : (
-                                    <X className="w-6 h-6 text-rose-500 opacity-50" />
+                                    <X className="w-5 h-5 text-rose-500 opacity-50" />
                                 )}
                             </div>
                         );
@@ -411,22 +410,22 @@ export const ShiftReportsPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col md:flex-row gap-4">
+            <div className="bg-white dark:bg-gray-900 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col md:flex-row gap-3">
                 <div className="relative flex-1">
                     <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <input
                         type="text"
                         placeholder="Buscar por funcionario o folio..."
-                        className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-sm"
+                        className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-[12px]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="relative md:w-64">
+                <div className="relative md:w-56">
                     <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <input
                         type="date"
-                        className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-sm"
+                        className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-[12px]"
                         value={dateFilter}
                         onChange={(e) => setDateFilter(e.target.value)}
                     />
@@ -447,16 +446,16 @@ export const ShiftReportsPage: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {filteredReports.map(report => (
-                        <div key={report.id} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[3rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all group p-1 ring-1 ring-gray-100 dark:ring-gray-800">
-                            <div className="p-8">
-                                <div className="flex justify-between items-start mb-8">
+                        <div key={report.id} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-all group p-1 ring-1 ring-gray-100 dark:ring-gray-800">
+                            <div className="p-6">
+                                <div className="flex justify-between items-start mb-6">
                                     <div className="flex items-center gap-4">
-                                        <div className={`p-4 rounded-[1.5rem] ${report.status === 'open' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-gray-100 text-gray-400'}`}>
-                                            <User className="w-6 h-6" />
+                                        <div className={`p-3 rounded-xl ${report.status === 'open' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-gray-100 text-gray-400'}`}>
+                                            <User className="w-5 h-5" />
                                         </div>
                                         <div>
-                                             <h4 className="font-black text-gray-900 dark:text-white leading-tight">{report.concierge_name}</h4>
-                                            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                             <h4 className="font-black text-[13px] text-gray-900 dark:text-white leading-tight">{report.concierge_name}</h4>
+                                            <p className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] flex items-center gap-2">
                                                 <span className="text-indigo-600 font-black">Turno {report.shift_type}</span>
                                                 <span>•</span>
                                                 <span>Folio {report.folio}</span>
@@ -464,7 +463,7 @@ export const ShiftReportsPage: React.FC = () => {
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end gap-2">
-                                        <span className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest ${report.status === 'open' ? 'bg-indigo-100 text-indigo-700 animate-pulse' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`}>
+                                        <span className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${report.status === 'open' ? 'bg-indigo-100 text-indigo-700 animate-pulse' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`}>
                                             {report.status === 'open' ? 'En Curso' : 'Finalizado'}
                                         </span>
                                         {isAdmin && report.status === 'closed' && (
@@ -612,26 +611,29 @@ export const ShiftReportsPage: React.FC = () => {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
                     {!activeReport ? (
-                        <div className="bg-white dark:bg-gray-900 rounded-[2rem] p-10 text-center animate-pulse">
+                        <div className="bg-white dark:bg-gray-900 rounded-3xl p-10 text-center shadow-2xl border border-gray-100 dark:border-gray-800 max-w-sm w-full mx-auto">
                             <Clock className="w-12 h-12 text-indigo-600 mx-auto mb-4 animate-spin" />
-                            <p className="font-black uppercase tracking-widest text-sm text-gray-500">Iniciando Reporte...</p>
+                            <p className="font-black uppercase tracking-widest text-[10px] text-gray-500 mb-6">Sincronizando Reporte...</p>
+                            <Button variant="secondary" size="sm" onClick={() => setIsModalOpen(false)} className="w-full">
+                                Cancelar
+                            </Button>
                         </div>
                     ) : (
-                        <div className="bg-white dark:bg-gray-900 rounded-[2rem] sm:rounded-[3.5rem] w-full max-w-3xl max-h-[95vh] flex flex-col shadow-2xl border border-white/20 dark:border-gray-800 overflow-hidden animate-in zoom-in-95 duration-300">
-                        <div className="p-6 sm:p-8 border-b dark:border-gray-800 flex items-center justify-between bg-amber-50/40 dark:bg-amber-950/20">
-                            <div className="flex items-center gap-3 sm:gap-5">
-                                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-amber-600 rounded-2xl sm:rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-amber-600/30 ring-4 ring-amber-100 dark:ring-amber-900/30">
-                                    <Save className="w-6 h-6 sm:w-8 sm:h-8" />
+                        <div className="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-white/20 dark:border-gray-800 overflow-hidden animate-in zoom-in-95 duration-300">
+                        <div className="p-5 sm:p-6 border-b dark:border-gray-800 flex items-center justify-between bg-amber-50/40 dark:bg-amber-950/20">
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-600 rounded-xl flex items-center justify-center text-white shadow-xl shadow-amber-600/30 ring-4 ring-amber-100 dark:ring-amber-900/30">
+                                    <Save className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl sm:text-3xl font-black text-gray-900 dark:text-white leading-none mb-1">
+                                    <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-none mb-1">
                                         Reporte de Turno
                                     </h2>
-                                    <p className="text-[10px] sm:text-xs font-bold text-amber-600 uppercase tracking-widest">Procedimiento Operativo</p>
+                                    <p className="text-[9px] font-bold text-amber-600 uppercase tracking-widest">Procedimiento Operativo</p>
                                 </div>
                             </div>
-                            <button onClick={() => setIsModalOpen(false)} className="p-2 sm:p-4 hover:bg-white dark:hover:bg-gray-800 rounded-2xl sm:rounded-3xl transition-colors text-gray-400 border border-gray-100 dark:border-gray-800">
-                                <X className="w-6 h-6 sm:w-8 sm:h-8" />
+                            <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-colors text-gray-400 border border-gray-100 dark:border-gray-800">
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
 
