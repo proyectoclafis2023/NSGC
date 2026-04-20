@@ -17,7 +17,8 @@ const MASTER_MODULES = [
   "bancos",
   "articulos_personal",
   "maestro_categorias_articulos",
-  "emergencias"
+  "emergencias",
+  "mensajes_dirigidos"
 ];
 
 const DATA_SCHEMA_VERSION = "3.2.0";

@@ -11,6 +11,7 @@ import { CommonSpaceProvider } from './context/CommonSpaceContext';
 import { ReservationProvider } from './context/ReservationContext';
 import { InfrastructureProvider } from './context/InfrastructureContext';
 import { SystemMessageProvider } from './context/SystemMessageContext';
+import { DirectedMessageProvider } from './context/DirectedMessageContext';
 import { ResidentProvider } from './context/ResidentContext';
 import { LoginPage } from './pages/LoginPage';
 import { Dashboard } from './pages/Dashboard';
@@ -145,7 +146,8 @@ function App() {
                               <ReservationProvider>
                                 <InfrastructureProvider>
                                   <SystemMessageProvider>
-                                    <PersonnelProvider>
+                                    <DirectedMessageProvider>
+                                      <PersonnelProvider>
                                       <ParkingProvider>
                                         <BankProvider>
                                           <ArticleProvider>
@@ -282,7 +284,8 @@ function App() {
                                           </ArticleProvider>
                                         </BankProvider>
                                       </ParkingProvider>
-                                    </PersonnelProvider>
+                                      </PersonnelProvider>
+                                    </DirectedMessageProvider>
                                   </SystemMessageProvider>
                                 </InfrastructureProvider>
                               </ReservationProvider>

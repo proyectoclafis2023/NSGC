@@ -13,6 +13,7 @@ const prisma = new PrismaClient();
 const MAX_ROWS_LIMIT = parseInt(process.env.MASS_UPLOAD_MAX_ROWS) || 1000;
 
 const { MASTER_MODULES } = require('../../config/masterModules');
+const bulkSamples = require('../../config/bulk-samples');
 
 class MassUploadService {
   /**
@@ -219,7 +220,7 @@ class MassUploadService {
       'torres', 'tipos_unidad', 'unidades', 'estacionamientos',
       'bancos', 'afps', 'previsiones', 'personal',
       'propietarios', 'residentes',
-      'correspondencia', 'visitas', 'solicitud_insumos'
+      'correspondencia', 'visitas', 'solicitud_insumos', 'mensajes_dirigidos'
     ];
 
     try {
@@ -309,19 +310,31 @@ class MassUploadService {
     const config = registry[moduleKey];
     if (!config) throw new Error(`[EXPORT_ERROR] Módulo '${moduleKey}' no registrado.`);
 
+    const filter = ['ParametroSistema', 'Afc'].includes(config.model) ? { isActive: true } : { isArchived: false };
     const data = await prisma[config.model].findMany({
-        where: { isArchived: false }
+        where: filter
     });
 
-    const transformed = data.map(row => {
-        const excelRow = {};
-        config.fields.forEach(f => {
-            if (row[f.bd] !== undefined) {
-                excelRow[f.excel] = row[f.bd];
-            }
-        });
-        return excelRow;
+    const sample = bulkSamples[moduleKey] || {};
+    
+    // Ensure all headers exist even if sample is missing some
+    const fullSample = {};
+    config.fields.forEach(f => {
+        fullSample[f.excel] = sample[f.excel] || '';
     });
+
+    const transformed = [
+        fullSample,
+        ...data.map(row => {
+            const excelRow = {};
+            config.fields.forEach(f => {
+                if (row[f.bd] !== undefined) {
+                    excelRow[f.excel] = row[f.bd];
+                }
+            });
+            return excelRow;
+        })
+    ];
 
     const ws = XLSX.utils.json_to_sheet(transformed);
     const wb = XLSX.utils.book_new();
@@ -351,14 +364,24 @@ class MassUploadService {
         const config = registry[moduleKey];
         if (!config) continue;
 
-        const data = await prisma[config.model].findMany({ where: { isArchived: false } });
-        const transformed = data.map(row => {
-            const excelRow = {};
-            config.fields.forEach(f => {
-                if (row[f.bd] !== undefined) excelRow[f.excel] = row[f.bd];
-            });
-            return excelRow;
+        const filter = ['ParametroSistema', 'Afc'].includes(config.model) ? { isActive: true } : { isArchived: false };
+        const data = await prisma[config.model].findMany({ where: filter });
+        const sample = bulkSamples[moduleKey] || {};
+        const fullSample = {};
+        config.fields.forEach(f => {
+            fullSample[f.excel] = sample[f.excel] || '';
         });
+
+        const transformed = [
+            fullSample,
+            ...data.map(row => {
+                const excelRow = {};
+                config.fields.forEach(f => {
+                    if (row[f.bd] !== undefined) excelRow[f.excel] = row[f.bd];
+                });
+                return excelRow;
+            })
+        ];
 
         const ws = XLSX.utils.json_to_sheet(transformed);
         XLSX.utils.book_append_sheet(wb, ws, moduleKey.toUpperCase());

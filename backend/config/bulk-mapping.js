@@ -107,8 +107,14 @@ module.exports = {
     uniqueKey: 'description',
     mapping: {
       'descripcion': 'description', 'modelo': 'model', 'precio_compra': 'purchasePrice',
-      'valor_depreciado': 'depreciatedValue', 'fecha_compra': 'purchaseDate',
+      'valor_depreciated': 'depreciatedValue', 'fecha_compra': 'purchaseDate',
       'detalles': 'details', 'cantidad': 'quantity'
+    }
+  },
+  mensajes_dirigidos: {
+    model: 'aviso',
+    mapping: {
+      'mensaje': 'text', 'tipo': 'type', 'activo': 'isActive', 'unidad_id': 'unitId'
     }
   }
 };

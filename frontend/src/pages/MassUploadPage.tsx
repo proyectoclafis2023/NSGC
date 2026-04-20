@@ -26,7 +26,8 @@ const CANONICAL_MASTER_MODULES = [
   "bancos",
   "articulos_personal",
   "maestro_categorias_articulos",
-  "emergencias"
+  "emergencias",
+  "mensajes_dirigidos"
 ];
 
 export const MassUploadPage: React.FC = () => {

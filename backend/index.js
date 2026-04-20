@@ -2264,7 +2264,7 @@ app.delete('/api/directiva/:id', authorize('roles:manage'), async (req, res) => 
 app.get('/api/mensajes', authorize('announcements:manage'), async (req, res) => {
     try {
         const data = await prisma.aviso.findMany({ 
-            where: { isArchived: false },
+            where: { isArchived: false, unitId: null },
             orderBy: { createdAt: 'desc' }
         });
         res.json(mapResponse('mensajes', data));
@@ -2459,12 +2459,31 @@ app.delete('/api/registro_contratistas/:id', authorize('contractors:view'), asyn
 });
 
 
-// --- 5.3.4 Mensajes Dirigidos (Email) ---
+// --- 5.3.4 Mensajes Dirigidos (Persistente) ---
+app.get('/api/mensajes_dirigidos', authorize('announcements:manage'), async (req, res) => {
+    try {
+        const data = await prisma.aviso.findMany({ 
+            where: { isArchived: false, NOT: { unitId: null } },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json(mapResponse('mensajes_dirigidos', data));
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.post('/api/mensajes_dirigidos', authorize('announcements:manage'), requestMapper('mensajes_dirigidos'), async (req, res) => {
     try {
-        const { target, subject, message } = req.body;
-        // Logic for sending email to multiple recipients
-        res.json({ success: true, recipients: 0 });
+        const data = await prisma.aviso.create({ data: req.body });
+        res.status(201).json(mapResponse('mensajes_dirigidos', data));
+    } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+app.delete('/api/mensajes_dirigidos/:id', authorize('announcements:manage'), async (req, res) => {
+    try {
+        await prisma.aviso.update({
+            where: { id: req.params.id },
+            data: { isArchived: true }
+        });
+        res.json({ success: true });
     } catch (err) { res.status(400).json({ error: err.message }); }
 });
 

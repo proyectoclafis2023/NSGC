@@ -383,18 +383,20 @@ const registry = {
 
     // 5.3.4 Mensajes Dirigidos -> Historico
     mensajes_dirigidos: {
-        model: 'CommunicationHistory',
+        model: 'Aviso',
+        isMaster: true,
         fields: [
             { api: 'id', bd: 'id', excel: 'id' },
-            { api: 'subject', bd: 'subject', excel: 'asunto' },
-            { api: 'message', bd: 'message', excel: 'mensaje' },
-            { api: 'recipients', bd: 'recipients', excel: 'destinatarios' },
-            { api: 'sender_id', bd: 'senderId', excel: 'remitente_id' },
-            { api: 'target_filter', bd: 'targetFilter', excel: 'filtro_objetivo' },
-            { api: 'attachment_url', bd: 'attachmentUrl', excel: 'archivo_adjunto' },
-            { api: 'is_archived', bd: 'isArchived', excel: 'archivado' },
-            { api: 'created_at', bd: 'createdAt', excel: 'fecha_creacion' }
-        ]
+            { api: 'unitId', bd: 'unitId', excel: 'unidad_id' },
+            { api: 'text', bd: 'text', excel: 'mensaje' },
+            { api: 'type', bd: 'type', excel: 'tipo' },
+            { api: 'isActive', bd: 'isActive', excel: 'activo' },
+            { api: 'isArchived', bd: 'isArchived', excel: 'archivado' },
+            { api: 'createdAt', bd: 'createdAt', excel: 'fecha_creacion' }
+        ],
+        relations: {
+            department: 'unidades'
+        }
     },
 
     // 5.3.5 Avisos del Sistema (Visor)
