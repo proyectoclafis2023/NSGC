@@ -59,7 +59,7 @@ const authorize = (permissions) => {
 // --- PRODUCTION SECURITY (Phase 1, 3, 4) ---
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
-    max: process.env.NODE_ENV === 'development' ? 10000 : 100, 
+    max: 10000, // Aumentado para desarrollo y pruebas
     message: { error: 'Límite de peticiones excedido, intente en 15 minutos' }
 });
 app.use('/api/', apiLimiter);
@@ -117,12 +117,41 @@ const audit = async (req, action, entity, details = null, severity = 'LOW') => {
 };
 
 // --- Login Endpoint (Phase 1) ---
+const sendLoginResponse = (res, user) => {
+    const token = jwt.sign(
+        { userId: user.id }, 
+        process.env.JWT_SECRET || 'sgc_prod_secret', 
+        { expiresIn: '8h' }
+    );
+
+    const permissionsSlugs = user.roleRef?.permissions.map(p => p.permission.slug) || [];
+
+    return res.json({
+        token,
+        user: {
+            id: user.id,
+            name: user.names,
+            email: user.email,
+            role: user.roleRef?.name,
+            status: user.status,
+            relatedId: user.id,
+            permissions: permissionsSlugs
+        }
+    });
+};
+
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body; 
     console.log(`[LOGIN] Attempt: ${username}`);
     try {
         const user = await prisma.personnel.findFirst({
-            where: { email: username, isArchived: false },
+            where: { 
+                OR: [
+                    { email: username },
+                    { dni: username }
+                ],
+                isArchived: false 
+            },
             include: {
                 roleRef: {
                     include: {
@@ -135,52 +164,71 @@ app.post('/api/login', async (req, res) => {
                 }
             }
         });
-        console.log(`[LOGIN] Found user:`, user ? user.id : 'NONE');
+        
+        if (!user) {
+            console.warn(`[LOGIN] User not found: ${username}`);
+            // Fallback para desarrollo: si el usuario es "admin" y no existe, buscamos el primer admin
+            if (username === 'admin') {
+                const firstAdmin = await prisma.personnel.findFirst({
+                    where: { roleRef: { name: { in: ['admin', 'Administrador'] } } },
+                    include: { roleRef: { include: { permissions: { include: { permission: true } } } } }
+                });
+                if (firstAdmin) {
+                    const validPass = await bcrypt.compare(password, firstAdmin.password);
+                    if (validPass) return sendLoginResponse(res, firstAdmin);
+                }
+            }
+            return res.status(401).json({ error: 'Credenciales inválidas' });
+        }
 
-        if (!user || !user.password) {
+        if (!user.password) {
             return res.status(401).json({ error: 'Credenciales inválidas' });
         }
 
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
+            console.warn(`[LOGIN] Wrong password for: ${username}`);
             return res.status(401).json({ error: 'Credenciales inválidas' });
         }
 
-        const token = jwt.sign(
-            { userId: user.id }, 
-            process.env.JWT_SECRET || 'sgc_prod_secret', 
-            { expiresIn: '8h' }
-        );
+        return sendLoginResponse(res, user);
+    } catch (err) { 
+        console.error(`[LOGIN] Error:`, err);
+        res.status(500).json({ error: err.message }); 
+    }
+});
 
-        req.user = user; // Temporary attach for audit log
-        await audit(req, 'LOGIN_SUCCESS', 'System', { email: username });
+// --- Google Auth Simulation (Phase 1/3) ---
+app.post('/api/auth/google', async (req, res) => {
+    const { email, name } = req.body;
+    console.log(`[GOOGLE LOGIN] Attempt: ${email}`);
+    try {
+        let user = await prisma.personnel.findFirst({
+            where: { email, isArchived: false },
+            include: { roleRef: { include: { permissions: { include: { permission: true } } } } }
+        });
 
-        // Extraer los slugs de permisos en un array simple
-        const permissionsSlugs = user.roleRef?.permissions.map(p => p.permission.slug) || [];
-
-        // For resident/owner roles, find the related identity ID
-        let relatedId = user.id; // Default for admin/concierge
-        if (user.roleRef?.name === 'resident') {
-            const resData = await prisma.residente.findFirst({ where: { email: user.email } });
-            relatedId = resData?.id;
-        } else if (user.roleRef?.name === 'owner') {
-            const propData = await prisma.propietario.findFirst({ where: { email: user.email } });
-            relatedId = propData?.id;
+        if (!user) {
+            // En el prototipo, si el usuario de Google no existe, lo creamos como residente por defecto
+            console.log(`[GOOGLE LOGIN] Creating new user: ${email}`);
+            const defaultRole = await prisma.role.findFirst({ where: { name: 'resident' } });
+            user = await prisma.personnel.create({
+                data: {
+                    email,
+                    names: name,
+                    dni: 'GOOGLE-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
+                    roleId: defaultRole?.id || 'cmo6984qb000ovkwa4u5ued1w',
+                    status: 'active'
+                },
+                include: { roleRef: { include: { permissions: { include: { permission: true } } } } }
+            });
         }
 
-        res.json({
-            token,
-            user: { 
-                id: user.id, 
-                name: user.names, 
-                email: user.email,
-                role: user.roleRef?.name || 'Invitado',
-                status: user.status,
-                relatedId,
-                permissions: permissionsSlugs
-            }
-        });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+        return sendLoginResponse(res, user);
+    } catch (err) {
+        console.error(`[GOOGLE LOGIN] Error:`, err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // -------------------------

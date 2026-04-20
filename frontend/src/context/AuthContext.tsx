@@ -75,13 +75,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
             const response = await fetch(`${API_BASE_URL}/auth/google`, {
                 method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, name, photoUrl }),
             });
 
             if (response.ok) {
                 const data = await response.json();
-                setAuth(data);
+                localStorage.setItem('token', data.token);
+                setAuth({
+                    isAuthenticated: true,
+                    user: data.user
+                });
                 return true;
             }
             return false;
