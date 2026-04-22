@@ -15,7 +15,11 @@ export const MaestroMensajesPage: React.FC = () => {
 
     const fetchTemplates = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/maestro_mensajes`);
+            const response = await fetch(`${API_BASE_URL}/maestro_mensajes`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
             if (response.ok) {
                 const data = await response.json();
                 setTemplates(data);
@@ -46,7 +50,10 @@ export const MaestroMensajesPage: React.FC = () => {
         try {
             const response = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(editingItem),
             });
 
@@ -65,6 +72,9 @@ export const MaestroMensajesPage: React.FC = () => {
         try {
             const response = await fetch(`${API_BASE_URL}/maestro_mensajes/${id}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
             if (response.ok) {
                 fetchTemplates();

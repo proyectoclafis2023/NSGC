@@ -17,7 +17,7 @@ interface BulkUploadLog {
 }
 
 const LOAD_HIERARCHY = [
-    { step: 1, title: 'Maestros Base', entities: ['torres', 'tipos_unidad'], description: 'Estructuras y tipos fundamentales.' },
+    { step: 1, title: 'Maestros Base', entities: ['torres', 'tipos_unidad', 'maestro_mensajes'], description: 'Estructuras y tipos fundamentales.' },
     { step: 2, title: 'Infraestructura', entities: ['unidades', 'estacionamientos'], description: 'Mapeo de la propiedad física.' },
     { step: 3, title: 'Comunidad', entities: ['residentes', 'propietarios'], description: 'Personas vinculadas a unidades.' },
     { step: 4, title: 'Operaciones', entities: ['personal', 'articulos_personal'], description: 'RRHH y Logística.' }
@@ -36,9 +36,15 @@ export const CargaMasivaPage: React.FC = () => {
     const [history, setHistory] = useState<BulkUploadLog[]>([]);
 
     React.useEffect(() => {
-        fetch(`${API_BASE_URL}/bulk-masters`)
+        fetch(`${API_BASE_URL}/bulk-masters`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        })
             .then(res => res.json())
-            .then(setMasters)
+            .then(data => {
+                if (Array.isArray(data)) setMasters(data);
+            })
             .catch(console.error);
     }, []);
 
@@ -64,6 +70,9 @@ export const CargaMasivaPage: React.FC = () => {
         try {
             const response = await fetch(`${API_BASE_URL}/bulk-import?dryRun=${isDryRun}`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: formData
             });
 
@@ -83,16 +92,22 @@ export const CargaMasivaPage: React.FC = () => {
     };
 
     const downloadEverything = () => {
-        window.open(`${API_BASE_URL}/bulk-export`);
+        const token = localStorage.getItem('token');
+        window.open(`${API_BASE_URL}/bulk-export?token=${token}`);
     };
 
     const downloadExcelTemplate = () => {
-        window.open(`${API_BASE_URL}/bulk-export/${selectedEntity}`);
+        const token = localStorage.getItem('token');
+        window.open(`${API_BASE_URL}/bulk-export/${selectedEntity}?token=${token}`);
     };
 
     const fetchHistory = async () => {
         try {
-            const resp = await fetch(`${API_BASE_URL}/bulk_upload_logs`);
+            const resp = await fetch(`${API_BASE_URL}/bulk_upload_logs`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
             if (resp.ok) setHistory(await resp.json());
             setShowHistory(true);
         } catch (e) {
@@ -103,7 +118,12 @@ export const CargaMasivaPage: React.FC = () => {
     const deleteLog = async (id: string) => {
         if (!confirm('¿Eliminar este registro de auditoría?')) return;
         try {
-            const resp = await fetch(`${API_BASE_URL}/bulk_upload_logs/${id}`, { method: 'DELETE' });
+            const resp = await fetch(`${API_BASE_URL}/bulk_upload_logs/${id}`, { 
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
             if (resp.ok) setHistory(history.filter(log => log.id !== id));
         } catch (e) { console.error(e); }
     };
@@ -144,7 +164,14 @@ export const CargaMasivaPage: React.FC = () => {
                         <div key={h.step} className="bg-white/10 backdrop-blur-sm p-4 rounded-3xl border border-white/10 relative group hover:bg-white/20 transition-all">
                             <span className="absolute -top-3 -left-3 w-8 h-8 bg-white text-indigo-600 rounded-full flex items-center justify-center font-black shadow-lg">{h.step}</span>
                             <h3 className="font-black text-sm mb-1 uppercase text-indigo-100">{h.title}</h3>
-                            <p className="text-[10px] opacity-70 leading-tight">{h.description}</p>
+                            <p className="text-[10px] opacity-70 leading-tight mb-2">{h.description}</p>
+                            <div className="flex flex-wrap gap-1">
+                                {h.entities.map(e => (
+                                    <span key={e} className="text-[8px] bg-white/20 px-2 py-0.5 rounded-full font-bold uppercase">
+                                        {e.replace(/_/g, ' ')}
+                                    </span>
+                                ))}
+                            </div>
                             {h.step < 4 && <ArrowRight className="hidden md:block absolute -right-6 top-1/2 transform -translate-y-1/2 opacity-30" />}
                         </div>
                     ))}

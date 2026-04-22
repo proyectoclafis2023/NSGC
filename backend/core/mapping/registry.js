@@ -833,7 +833,9 @@ const registry = {
             { api: 'id', bd: 'id', excel: 'id' },
             { api: 'name', bd: 'nombre', excel: 'nombre' },
             { api: 'subject', bd: 'subject', excel: 'asunto' },
-            { api: 'message', bd: 'message', excel: 'mensaje' }
+            { api: 'message', bd: 'message', excel: 'mensaje' },
+            { api: 'type', bd: 'type', excel: 'tipo' },
+            { api: 'is_archived', bd: 'isArchived', excel: 'archivado' }
         ]
     },
 
