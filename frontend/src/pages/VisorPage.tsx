@@ -41,7 +41,8 @@ export const VisorPage: React.FC = () => {
             setEditingMessage(msg);
             setText(msg.text);
             setType(msg.type);
-            setExpiresAt(msg.expires_at || '');
+            // Extract only YYYY-MM-DD for the date input — the DB stores full ISO datetime
+            setExpiresAt(msg.expires_at ? msg.expires_at.slice(0, 10) : '');
             setTags(msg.tags || []);
             setImage(msg.image);
             setYoutubeUrl(msg.youtube_url);

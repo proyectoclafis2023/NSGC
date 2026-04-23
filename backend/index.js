@@ -2281,9 +2281,11 @@ app.post('/api/mensajes', authorize('announcements:manage'), requestMapper('mens
 
 app.put('/api/mensajes/:id', authorize('announcements:manage'), requestMapper('mensajes'), async (req, res) => {
     try {
+        // Strip non-updatable fields that Prisma rejects in update()
+        const { id, isArchived, createdAt, ...updateData } = req.body;
         const data = await prisma.aviso.update({
             where: { id: req.params.id },
-            data: req.body
+            data: updateData
         });
         res.json(mapResponse('mensajes', data));
     } catch (err) { res.status(400).json({ error: err.message }); }
