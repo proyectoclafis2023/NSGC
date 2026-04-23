@@ -190,10 +190,14 @@ export const PublicCarouselPage: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                ) : currentMsg.is_full_image && currentMsg.image ? (
+                ) : currentMsg.is_full_image && (currentMsg.image || ytUrl) ? (
                     <div className="absolute inset-0 animate-in fade-in zoom-in-105 duration-1000">
-                        <img src={currentMsg.image} alt="Full Screen" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 p-12 flex flex-col justify-end">
+                        {ytUrl ? (
+                            <iframe src={ytUrl} className="w-full h-full object-cover pointer-events-none" frameBorder="0" allow="autoplay; encrypted-media" allowFullScreen />
+                        ) : (
+                            <img src={currentMsg.image} alt="Full Screen" className="w-full h-full object-cover" />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 p-12 flex flex-col justify-end pointer-events-none">
                             <div className="max-w-4xl space-y-4">
                                 <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-[0.2em] border border-white/30">
                                     {assets.label}

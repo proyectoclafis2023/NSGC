@@ -273,57 +273,70 @@ export const VisorPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Imagen del Aviso (Opcional)</label>
-                                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-                                    {image ? (
-                                        <div className="relative w-20 h-20 rounded-xl overflow-hidden shadow-md">
-                                            <img src={image} alt="Preview" className="w-full h-full object-cover" />
-                                            <button
-                                                type="button"
-                                                onClick={() => setImage(undefined)}
-                                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-lg"
-                                            >
-                                                <X className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <label className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-indigo-500 transition-colors">
-                                            <Camera className="w-6 h-6 text-gray-400" />
-                                            <span className="text-[8px] font-bold text-gray-400">SUBIR</span>
-                                            <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                                        </label>
-                                    )}
-                                    <div className="flex-1 space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-[10px] font-bold text-gray-500 uppercase">Ocupar gran parte del aviso</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsFullImage(!is_full_image)}
-                                                className={`w-10 h-5 rounded-full transition-all relative ${is_full_image ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'}`}
-                                            >
+                            <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Multimedia (Opcional - Elegir uno)</label>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Imagen */}
+                                    <div className={`flex items-center gap-4 p-3 rounded-xl border ${youtube_url ? 'opacity-50 pointer-events-none' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900'}`}>
+                                        {image ? (
+                                            <div className="relative w-16 h-16 rounded-xl overflow-hidden shadow-md">
+                                                <img src={image} alt="Preview" className="w-full h-full object-cover" />
                                                 <button
                                                     type="button"
-                                                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${is_full_image ? 'translate-x-5.5' : 'translate-x-0.5'}`}
-                                                />
-                                            </button>
+                                                    onClick={() => setImage(undefined)}
+                                                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-lg"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <label className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-indigo-500 transition-colors">
+                                                <Camera className="w-5 h-5 text-gray-400" />
+                                                <span className="text-[7px] font-bold text-gray-400">SUBIR</span>
+                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                                                    setYoutubeUrl(undefined);
+                                                    handleImageUpload(e);
+                                                }} />
+                                            </label>
+                                        )}
+                                        <div className="flex-1 text-xs text-gray-500 font-medium">Imagen del Aviso</div>
+                                    </div>
+
+                                    {/* YouTube */}
+                                    <div className={`flex flex-col justify-center gap-2 p-3 rounded-xl border ${image ? 'opacity-50 pointer-events-none' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900'}`}>
+                                        <div className="text-xs text-gray-500 font-medium">Link de YouTube</div>
+                                        <div className="relative">
+                                            <Youtube className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-red-600" />
+                                            <input
+                                                type="url"
+                                                value={youtube_url || ''}
+                                                onChange={(e) => {
+                                                    setImage(undefined);
+                                                    setYoutubeUrl(e.target.value);
+                                                }}
+                                                placeholder="https://youtu.be/..."
+                                                className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs"
+                                            />
                                         </div>
-                                        <p className="text-[10px] text-gray-400 italic">Si se marca, la imagen ocupará el fondo o un lateral prominente.</p>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="space-y-1.5">
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Link de YouTube (Opcional)</label>
-                                <div className="relative">
-                                    <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-600" />
-                                    <input
-                                        type="url"
-                                        value={youtube_url || ''}
-                                        onChange={(e) => setYoutubeUrl(e.target.value)}
-                                        placeholder="https://www.youtube.com/watch?v=..."
-                                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
-                                    />
+                                <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                                    <div>
+                                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Ocupar mayor tamaño en el visor</span>
+                                        <p className="text-[10px] text-gray-500 italic mt-0.5">Si se marca, el multimedia (imagen o video) se expandirá.</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsFullImage(!is_full_image)}
+                                        className={`w-10 h-5 rounded-full transition-all relative ${is_full_image ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                    >
+                                        <button
+                                            type="button"
+                                            className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${is_full_image ? 'translate-x-5.5' : 'translate-x-0.5'}`}
+                                        />
+                                    </button>
                                 </div>
                             </div>
 
