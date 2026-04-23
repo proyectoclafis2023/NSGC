@@ -104,6 +104,11 @@ Herramienta de diagnóstico CLI que valida la alineación canónica.
 
 ## 📦 Changelog
 
+## v3.6.1 — Master Data Expansion
+- Integración de 'Maestro de Mensajes' en la descarga consolidada.
+- Nueva hoja 'MENSAJES_PREFIJADOS' en exportación global.
+- Normalización automática de hojas personalizadas en carga masiva.
+
 ## v3.6.0 — Enterprise Hardening
 
 ### 🔐 Auditoría Inmutable

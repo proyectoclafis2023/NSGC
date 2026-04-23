@@ -18,7 +18,8 @@ const MASTER_MODULES = [
   "articulos_personal",
   "maestro_categorias_articulos",
   "emergencias",
-  "mensajes_dirigidos"
+  "mensajes_dirigidos",
+  "maestro_mensajes"
 ];
 
 const DATA_SCHEMA_VERSION = "3.2.0";

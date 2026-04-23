@@ -33,12 +33,18 @@ class MassUploadService {
     const allMappedData = {};
     let autoFixedCount = 0;
 
-    for (const moduleKey of Object.keys(rawData)) {
-      const rows = rawData[moduleKey];
+    for (const rawKey of Object.keys(rawData)) {
+      let moduleKey = rawKey;
+      if (moduleKey === 'MENSAJES_PREFIJADOS') moduleKey = 'maestro_mensajes';
+      else moduleKey = moduleKey.toLowerCase(); // Standard normalization
+
+      const rows = rawData[rawKey];
       allMappedData[moduleKey] = [];
       const seenIdentifiers = new Set();
       const uniqueField = this.getUniqueKey(moduleKey);
       const config = registry[moduleKey];
+
+      if (!config) continue; // Skip sheets not in registry
 
       for (const [index, row] of rows.entries()) {
         const rowIndex = index + 2;
@@ -220,7 +226,7 @@ class MassUploadService {
       'torres', 'tipos_unidad', 'unidades', 'estacionamientos',
       'bancos', 'afps', 'previsiones', 'personal',
       'propietarios', 'residentes',
-      'correspondencia', 'visitas', 'solicitud_insumos', 'mensajes_dirigidos'
+      'correspondencia', 'visitas', 'solicitud_insumos', 'mensajes_dirigidos', 'maestro_mensajes'
     ];
 
     try {
@@ -338,7 +344,8 @@ class MassUploadService {
 
     const ws = XLSX.utils.json_to_sheet(transformed);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, moduleKey.toUpperCase());
+    const sheetName = moduleKey === 'maestro_mensajes' ? 'MENSAJES_PREFIJADOS' : moduleKey.toUpperCase();
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
 
     return XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
   }
@@ -355,7 +362,8 @@ class MassUploadService {
         const order = {
             'torres': 1, 'tipos_unidad': 2, 'unidades': 3, 'estacionamientos': 4, 'espacios': 5,
             'propietarios': 6, 'residentes': 7, 'personal': 8,
-            'afps': 9, 'previsiones': 10, 'bancos': 11, 'articulos_personal': 12, 'maestro_categorias_articulos': 13, 'emergencias': 14
+            'afps': 9, 'previsiones': 10, 'bancos': 11, 'articulos_personal': 12, 'maestro_categorias_articulos': 13, 'emergencias': 14,
+            'maestro_mensajes': 15
         };
         return (order[a] || 99) - (order[b] || 99);
     });
@@ -384,7 +392,8 @@ class MassUploadService {
         ];
 
         const ws = XLSX.utils.json_to_sheet(transformed);
-        XLSX.utils.book_append_sheet(wb, ws, moduleKey.toUpperCase());
+        const sheetName = moduleKey === 'maestro_mensajes' ? 'MENSAJES_PREFIJADOS' : moduleKey.toUpperCase();
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
     }
 
     return XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
