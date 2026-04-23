@@ -20,7 +20,9 @@ module.exports = {
     uniqueKey: ['number', 'towerId'],
     relations: {
       'torre': { model: 'tower', field: 'name', target: 'towerId' },
-      'tipo_unidad': { model: 'tipoUnidad', field: 'nombre', target: 'unitTypeId' }
+      'tipo_unidad': { model: 'tipoUnidad', field: 'nombre', target: 'unitTypeId' },
+      'propietario': { model: 'propietario', field: 'dni', target: 'ownerId', searchAlt: ['names', 'lastNames'] },
+      'residente': { model: 'residente', field: 'dni', target: 'residentId', searchAlt: ['names', 'lastNames'] }
     },
     mapping: {
       'numero': 'number', 'piso': 'floor', 'm2': 'm2', 'm2_terreno': 'terrainM2',
@@ -88,10 +90,39 @@ module.exports = {
   personnel: {
     model: 'personnel',
     uniqueKey: 'dni',
+    relations: {
+      'banco': { model: 'banco', field: 'nombre', target: 'bankId' },
+      'afp': { model: 'pensionFund', field: 'name', target: 'pensionFundId' },
+      'prevision': { model: 'healthProvider', field: 'name', target: 'healthProviderId' }
+    },
     mapping: {
       'nombres': 'names', 'apellidos': 'lastNames', 'rut': 'dni', 'cargo': 'position',
       'direccion': 'address', 'honorario': 'isHonorary', 'sueldo_base': 'baseSalary',
       'dias_vacaciones': 'vacationDays', 'telefono': 'phone', 'email': 'email'
+    }
+  },
+  visitas: {
+    model: 'visita',
+    uniqueKey: 'folio',
+    relations: {
+      'residente': { model: 'residente', field: 'dni', target: 'residentId' },
+      'torre': { model: 'tower', field: 'name', target: 'towerId' },
+      'unidad': { model: 'department', field: 'number', target: 'departmentId' }
+    },
+    mapping: {
+      'folio': 'folio', 'nombres': 'names', 'dni': 'dni', 'fecha_visita': 'visitDate',
+      'hora_visita': 'visitTime', 'pre_registrado': 'isPreRegistered', 'estado': 'status'
+    }
+  },
+  correspondencia: {
+    model: 'correspondence',
+    uniqueKey: 'folio',
+    relations: {
+      'unidad': { model: 'department', field: 'number', target: 'departmentId' },
+      'torre': { model: 'tower', field: 'name', target: 'towerId' }
+    },
+    mapping: {
+      'folio': 'folio', 'tipo': 'type', 'destinatario': 'addressee', 'estado': 'status'
     }
   },
   articles: {
@@ -113,9 +144,14 @@ module.exports = {
   },
   mensajes_dirigidos: {
     model: 'aviso',
-    mapping: {
-      'mensaje': 'text', 'tipo': 'type', 'activo': 'isActive', 'unidad_id': 'unitId'
-    }
+    relations: { 'unidad': { model: 'department', field: 'number', target: 'unitId' } },
+    mapping: { 'mensaje': 'text', 'tipo': 'type', 'activo': 'isActive' }
+  },
+  reclamos: {
+    model: 'ticket',
+    uniqueKey: 'folio',
+    relations: { 'residente': { model: 'residente', field: 'dni', target: 'residentId' } },
+    mapping: { 'folio': 'folio', 'estado': 'status' }
   }
 };
 
@@ -129,4 +165,6 @@ mapping['previsiones']                   = mapping['health_providers'];
 mapping['maestro_categorias_articulos']  = mapping['article_categories'];
 mapping['maestro_emergencias']           = mapping['emergency_numbers'];
 mapping['articulos_personal']            = mapping['articles'];
+mapping['reclamos']                     = mapping['reclamos'];
+mapping['tickets']                      = mapping['reclamos'];
 

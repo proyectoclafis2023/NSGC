@@ -8,8 +8,8 @@ const DEFAULT_SETTINGS: SystemSettings = {
     system_name: 'SGC - Gestión de Condominios',
     systemIcon: 'S',
     cameraBackupDays: 7,
-    darkMode: false,
-    theme: 'light',
+    darkMode: true,
+    theme: 'dark',
     admin_name: '',
     adminRut: '',
     condo_rut: '',
@@ -31,7 +31,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.length > 0) {
-                    setSettings({ ...DEFAULT_SETTINGS, ...data[0] });
+                    // Always force dark mode even if DB says otherwise
+                    setSettings({ ...DEFAULT_SETTINGS, ...data[0], darkMode: true, theme: 'dark' });
                 }
             }
         } catch (e) {
@@ -45,16 +46,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     useEffect(() => {
         document.title = settings.system_name;
-        if (settings.theme === 'dark') {
-            document.documentElement.classList.add('dark');
-            document.documentElement.classList.remove('modern');
-        } else if (settings.theme === 'modern') {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.classList.add('modern');
-        } else {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.classList.remove('modern');
-        }
+        // Forced Night Mode - SGC Final Aesthetics
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('modern');
 
         if (settings.systemFavicon) {
             let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
@@ -68,49 +62,43 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     }, [settings]);
 
     const updateSettings = async (newSettings: SystemSettings) => {
-        // Optimistic update
-        setSettings(newSettings);
+        // Ensure dark mode is persisted
+        const forcedSettings = { ...newSettings, darkMode: true, theme: 'dark' as const };
+        setSettings(forcedSettings);
         
         try {
-            const method = (newSettings as any).id ? 'PUT' : 'POST';
-            const url = (newSettings as any).id ? `${API_URL}/${(newSettings as any).id}` : API_URL;
+            const method = (forcedSettings as any).id ? 'PUT' : 'POST';
+            const url = (forcedSettings as any).id ? `${API_URL}/${(forcedSettings as any).id}` : API_URL;
             
             const response = await fetch(url, {
                 method,
                 headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' },
-                body: JSON.stringify(newSettings)
+                body: JSON.stringify(forcedSettings)
             });
             
             if (response.ok) {
                 const updatedData = await response.json();
-                setSettings(prev => ({ ...prev, ...updatedData }));
+                setSettings(prev => ({ ...prev, ...updatedData, darkMode: true, theme: 'dark' }));
             } else {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Error al guardar la configuración');
             }
         } catch (e) {
             console.error('Error saving settings:', e);
-            // Revert or just keep the optimistic state? 
-            // Better to keep it for UX unless it's critical.
         }
     };
 
     const toggleTheme = () => {
-        const currentTheme = settings.theme || 'light';
-        const nextTheme: 'light' | 'dark' = currentTheme === 'light' ? 'dark' : 'light';
-
-        updateSettings({
-            ...settings,
-            theme: nextTheme,
-            darkMode: nextTheme === 'dark'
-        });
+        // Theme toggling disabled by architectural decision
+        console.log('Night Mode is forced for premium aesthetics.');
     };
 
     const setTheme = (theme: 'light' | 'dark' | 'modern') => {
+        // Always force dark
         updateSettings({
             ...settings,
-            theme,
-            darkMode: theme === 'dark'
+            theme: 'dark',
+            darkMode: true
         });
     };
 

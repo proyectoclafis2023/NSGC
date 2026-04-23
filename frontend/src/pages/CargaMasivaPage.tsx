@@ -93,12 +93,12 @@ export const CargaMasivaPage: React.FC = () => {
 
     const downloadEverything = () => {
         const token = localStorage.getItem('token');
-        window.open(`${API_BASE_URL}/bulk-export?token=${token}`);
+        window.open(`${API_BASE_URL}/mass_upload/export-all?token=${token}`);
     };
 
     const downloadExcelTemplate = () => {
         const token = localStorage.getItem('token');
-        window.open(`${API_BASE_URL}/bulk-export/${selectedEntity}?token=${token}`);
+        window.open(`${API_BASE_URL}/mass_upload/export/${selectedEntity}?token=${token}`);
     };
 
     const fetchHistory = async () => {

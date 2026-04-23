@@ -356,8 +356,6 @@ class MassUploadService {
   async exportAll() {
     const wb = XLSX.utils.book_new();
 
-    // Export in logical order (Infrastructure -> People -> Base)
-    // We sort according to common dependency logic
     const sortedMasters = [...MASTER_MODULES].sort((a, b) => {
         const order = {
             'torres': 1, 'tipos_unidad': 2, 'unidades': 3, 'estacionamientos': 4, 'espacios': 5,
@@ -373,23 +371,53 @@ class MassUploadService {
         if (!config) continue;
 
         const filter = ['ParametroSistema', 'Afc'].includes(config.model) ? { isActive: true } : { isArchived: false };
-        const data = await prisma[config.model].findMany({ where: filter });
-        const sample = bulkSamples[moduleKey] || {};
-        const fullSample = {};
-        config.fields.forEach(f => {
-            fullSample[f.excel] = sample[f.excel] || '';
-        });
+        
+        // Include relations if defined in registry
+        const include = {};
+        if (config.relations) {
+            Object.keys(config.relations).forEach(rel => {
+                include[rel] = true;
+            });
+        }
 
-        const transformed = [
-            fullSample,
-            ...data.map(row => {
+        const data = await prisma[config.model].findMany({ 
+            where: filter,
+            include: Object.keys(include).length > 0 ? include : undefined
+        });
+        
+        const transformed = data.length > 0 
+            ? data.map(row => {
                 const excelRow = {};
                 config.fields.forEach(f => {
-                    if (row[f.bd] !== undefined) excelRow[f.excel] = row[f.bd];
+                    let value = row[f.bd];
+                    
+                    // Check if this field corresponds to a relation defined in config.relations
+                    if (config.relations) {
+                        // Match exactly {rel}Id or {rel}_id or {rel}id
+                        const relKey = Object.keys(config.relations).find(r => 
+                            f.bd === `${r}Id` || 
+                            f.bd === `${r}_id` || 
+                            f.bd.toLowerCase() === `${r.toLowerCase()}id`
+                        );
+                        if (relKey && row[relKey]) {
+                            value = this._resolveDisplayName(row[relKey]);
+                        }
+                    }
+
+                    if (value !== null && value !== undefined) {
+                        excelRow[f.excel] = value;
+                    }
                 });
                 return excelRow;
             })
-        ];
+            : [(() => {
+                const sample = bulkSamples[moduleKey] || {};
+                const fullSample = {};
+                config.fields.forEach(f => {
+                    fullSample[f.excel] = sample[f.excel] || '';
+                });
+                return fullSample;
+            })()];
 
         const ws = XLSX.utils.json_to_sheet(transformed);
         const sheetName = moduleKey === 'maestro_mensajes' ? 'MENSAJES_PREFIJADOS' : moduleKey.toUpperCase();
@@ -397,6 +425,17 @@ class MassUploadService {
     }
 
     return XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  }
+
+  _resolveDisplayName(item) {
+    if (!item) return '';
+    if (item.names && item.lastNames) return `${item.names} ${item.lastNames}`;
+    if (item.names) return item.names; // Handle single name or personnel without lastNames populated in object
+    if (item.name) return item.name;
+    if (item.nombre) return item.nombre;
+    if (item.number) return item.number;
+    if (item.folio) return item.folio;
+    return item.id || '';
   }
 
   getUniqueKey(moduleKey) {

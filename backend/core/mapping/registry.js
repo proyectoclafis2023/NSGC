@@ -12,7 +12,7 @@ const registry = {
         fields: [
             { api: 'id', bd: 'id', excel: 'id' },
             { api: 'folio', bd: 'folio', excel: 'folio' },
-            { api: 'concierge_id', bd: 'conciergeId', excel: 'funcionario_id' },
+            { api: 'concierge_id', bd: 'conciergeId', excel: 'funcionario' },
             { api: 'concierge_name', bd: 'conciergeName', excel: 'funcionario_nombre' },
             { api: 'shift_date', bd: 'shiftDate', excel: 'fecha_turno' },
             { api: 'shift_type', bd: 'shiftType', excel: 'tipo_turno' },
@@ -34,9 +34,9 @@ const registry = {
             { api: 'admin_reopen_reason', bd: 'adminReopenReason', excel: 'motivo_reapertura' },
             { api: 'is_archived', bd: 'isArchived', excel: 'archivado' },
             { api: 'created_at', bd: 'createdAt', excel: 'fecha_creacion' },
-            { api: 'resident_id', bd: 'residentId', excel: 'residente_id' },
-            { api: 'owner_id', bd: 'ownerId', excel: 'propietario_id' },
-            { api: 'department_id', bd: 'departmentId', excel: 'unidad_id' }
+            { api: 'resident_id', bd: 'residentId', excel: 'residente' },
+            { api: 'owner_id', bd: 'ownerId', excel: 'propietario' },
+            { api: 'department_id', bd: 'departmentId', excel: 'unidad' }
         ],
         relations: {
             resident: 'residentes',
@@ -51,11 +51,11 @@ const registry = {
         model: 'ShiftLog',
         fields: [
             { api: 'id', bd: 'id', excel: 'id' },
-            { api: 'daily_report_id', bd: 'dailyReportId', excel: 'reporte_id' },
+            { api: 'daily_report_id', bd: 'dailyReportId', excel: 'reporte' },
             { api: 'timestamp', bd: 'timestamp', excel: 'timestamp' },
             { api: 'event', bd: 'event', excel: 'evento' },
             { api: 'category', bd: 'category', excel: 'categoria' },
-            { api: 'concierge_id', bd: 'conciergeId', excel: 'funcionario_id' },
+            { api: 'concierge_id', bd: 'conciergeId', excel: 'funcionario' },
             { api: 'is_archived', bd: 'isArchived', excel: 'archivado' },
             { api: 'created_at', bd: 'createdAt', excel: 'fecha_creacion' }
         ],
@@ -73,9 +73,9 @@ const registry = {
             { api: 'folio', bd: 'folio', excel: 'folio' },
             { api: 'names', bd: 'names', excel: 'nombres' },
             { api: 'dni', bd: 'dni', excel: 'dni' },
-            { api: 'resident_id', bd: 'residentId', excel: 'residente_id' },
-            { api: 'tower_id', bd: 'towerId', excel: 'torre_id' },
-            { api: 'department_id', bd: 'departmentId', excel: 'unidad_id' },
+            { api: 'resident_id', bd: 'residentId', excel: 'residente' },
+            { api: 'tower_id', bd: 'towerId', excel: 'torre' },
+            { api: 'department_id', bd: 'departmentId', excel: 'unidad' },
             { api: 'visit_date', bd: 'visitDate', excel: 'fecha_visita' },
             { api: 'visit_time', bd: 'visitTime', excel: 'hora_visita' },
             { api: 'is_pre_registered', bd: 'isPreRegistered', excel: 'pre_registrado' },
@@ -99,8 +99,8 @@ const registry = {
         fields: [
             { api: 'id', bd: 'id', excel: 'id' },
             { api: 'folio', bd: 'folio', excel: 'folio' },
-            { api: 'department_id', bd: 'departmentId', excel: 'unidad_id' },
-            { api: 'tower_id', bd: 'towerId', excel: 'torre_id' },
+            { api: 'department_id', bd: 'departmentId', excel: 'unidad' },
+            { api: 'tower_id', bd: 'towerId', excel: 'torre' },
             { api: 'type', bd: 'type', excel: 'tipo' },
             { api: 'addressee', bd: 'addressee', excel: 'destinatario' },
             { api: 'status', bd: 'status', excel: 'estado' },
@@ -124,7 +124,7 @@ const registry = {
             { api: 'dni', bd: 'dni', excel: 'dni' },
             { api: 'company', bd: 'company', excel: 'empresa' },
             { api: 'subject', bd: 'subject', excel: 'asunto' },
-            { api: 'department_id', bd: 'departmentId', excel: 'unidad_id' },
+            { api: 'department_id', bd: 'departmentId', excel: 'unidad' },
             { api: 'status', bd: 'status', excel: 'estado' },
             { api: 'entry_at', bd: 'entryAt', excel: 'fecha_entrada' },
             { api: 'exit_at', bd: 'exitAt', excel: 'fecha_salida' },
@@ -148,7 +148,7 @@ const registry = {
             { api: 'dni', bd: 'dni', excel: 'dni' },
             { api: 'company', bd: 'company', excel: 'empresa' },
             { api: 'subject', bd: 'subject', excel: 'asunto' },
-            { api: 'department_id', bd: 'departmentId', excel: 'unidad_id' },
+            { api: 'department_id', bd: 'departmentId', excel: 'unidad' },
             { api: 'status', bd: 'status', excel: 'estado' },
             { api: 'entry_at', bd: 'entryAt', excel: 'fecha_entrada' },
             { api: 'exit_at', bd: 'exitAt', excel: 'fecha_salida' },
@@ -169,7 +169,7 @@ const registry = {
             { api: 'folio', bd: 'folio', excel: 'folio' },
             { api: 'name', bd: 'name', excel: 'nombre' },
             { api: 'description', bd: 'description', excel: 'descripcion' },
-            { api: 'requested_by', bd: 'requestedBy', excel: 'solicitante_id' },
+            { api: 'requested_by', bd: 'requestedBy', excel: 'solicitante' },
             { api: 'status', bd: 'status', excel: 'estado' },
             { api: 'is_archived', bd: 'isArchived', excel: 'archivado' },
             { api: 'created_at', bd: 'createdAt', excel: 'fecha_creacion' }
@@ -200,7 +200,7 @@ const registry = {
         fields: [
             { api: 'id', bd: 'id', excel: 'id' },
             { api: 'folio', bd: 'folio', excel: 'folio' },
-            { api: 'camera_id', bd: 'cameraId', excel: 'camara_id' },
+            { api: 'camera_id', bd: 'cameraId', excel: 'camara' },
             { api: 'event_type', bd: 'eventType', excel: 'tipo_evento' },
             { api: 'description', bd: 'description', excel: 'descripcion' },
             { api: 'recorded_at', bd: 'recordedAt', excel: 'fecha_registro' },
@@ -221,9 +221,9 @@ const registry = {
         fields: [
             { api: 'id', bd: 'id', excel: 'id' },
             { api: 'folio', bd: 'folio', excel: 'folio' },
-            { api: 'resident_id', bd: 'residentId', excel: 'residente_id' },
-            { api: 'unit_id', bd: 'unitId', excel: 'unidad_id' },
-            { api: 'tower_id', bd: 'towerId', excel: 'torre_id' },
+            { api: 'resident_id', bd: 'residentId', excel: 'residente' },
+            { api: 'unit_id', bd: 'unitId', excel: 'unidad' },
+            { api: 'tower_id', bd: 'towerId', excel: 'torre' },
             { api: 'type', bd: 'type', excel: 'tipo' },
             { api: 'subject', bd: 'subject', excel: 'asunto' },
             { api: 'description', bd: 'description', excel: 'descripcion' },
@@ -247,8 +247,8 @@ const registry = {
         fields: [
             { api: 'id', bd: 'id', excel: 'id' },
             { api: 'folio', bd: 'folio', excel: 'folio' },
-            { api: 'common_space_id', bd: 'commonSpaceId', excel: 'espacio_id' },
-            { api: 'resident_id', bd: 'residentId', excel: 'residente_id' },
+            { api: 'common_space_id', bd: 'commonSpaceId', excel: 'espacio' },
+            { api: 'resident_id', bd: 'residentId', excel: 'residente' },
             { api: 'start_at', bd: 'startAt', excel: 'fecha_inicio' },
             { api: 'end_at', bd: 'endAt', excel: 'fecha_fin' },
             { api: 'status', bd: 'status', excel: 'estado' },
@@ -302,7 +302,7 @@ const registry = {
         fields: [
             { api: 'id', bd: 'id', excel: 'id' },
             { api: 'folio', bd: 'folio', excel: 'folio' },
-            { api: 'resident_id', bd: 'residentId', excel: 'residente_id' },
+            { api: 'resident_id', bd: 'residentId', excel: 'residente' },
             { api: 'status', bd: 'status', excel: 'estado' },
             { api: 'created_at', bd: 'createdAt', excel: 'fecha_creacion' }
         ],
@@ -323,8 +323,8 @@ const registry = {
             { api: 'email', bd: 'email', excel: 'correo' },
             { api: 'phone', bd: 'phone', excel: 'telefono' },
             { api: 'photo', bd: 'photo', excel: 'foto' },
-            { api: 'tower_id', bd: 'towerId', excel: 'torre_id' },
-            { api: 'unit_id', bd: 'unitId', excel: 'unidad_id' },
+            { api: 'tower_id', bd: 'towerId', excel: 'torre' },
+            { api: 'unit_id', bd: 'unitId', excel: 'unidad' },
             { api: 'parking_ids', bd: 'parkingIds', excel: 'estacionamientos', isJson: true },
             { api: 'family_count', bd: 'familyCount', excel: 'integrantes_familia' },
             { api: 'has_pets', bd: 'hasPets', excel: 'tiene_mascotas' },
@@ -337,7 +337,8 @@ const registry = {
             { api: 'created_at', bd: 'createdAt', excel: 'fecha_creacion' }
         ],
         relations: {
-            departments: 'unidades'
+            tower: 'torres',
+            unit: 'unidades'
         }
     },
 
@@ -387,7 +388,7 @@ const registry = {
         isMaster: true,
         fields: [
             { api: 'id', bd: 'id', excel: 'id' },
-            { api: 'unitId', bd: 'unitId', excel: 'unidad_id' },
+            { api: 'unitId', bd: 'unitId', excel: 'unidad' },
             { api: 'text', bd: 'text', excel: 'mensaje' },
             { api: 'type', bd: 'type', excel: 'tipo' },
             { api: 'isActive', bd: 'isActive', excel: 'activo' },
@@ -395,7 +396,7 @@ const registry = {
             { api: 'createdAt', bd: 'createdAt', excel: 'fecha_creacion' }
         ],
         relations: {
-            department: 'unidades'
+            unit: 'unidades'
         }
     },
 
@@ -431,14 +432,14 @@ const registry = {
             { api: 'email', bd: 'email', excel: 'correo' },
             { api: 'photo', bd: 'photo', excel: 'foto' },
             { api: 'is_honorary', bd: 'isHonorary', excel: 'honorario' },
-            { api: 'bank_id', bd: 'bankId', excel: 'banco_id' },
+            { api: 'bank_id', bd: 'bankId', excel: 'banco' },
             { api: 'account_number', bd: 'accountNumber', excel: 'numero_cuenta' },
             { api: 'base_salary', bd: 'baseSalary', excel: 'sueldo_base' },
             { api: 'vacation_days', bd: 'vacationDays', excel: 'dias_vacaciones' },
             { api: 'vacation_last_update', bd: 'vacationLastUpdate', excel: 'ultima_actualizacion_vacaciones' },
-            { api: 'health_provider_id', bd: 'healthProviderId', excel: 'prevision_id' },
-            { api: 'pension_fund_id', bd: 'pensionFundId', excel: 'afp_id' },
-            { api: 'jornada_group_id', bd: 'jornadaGroupId', excel: 'grupo_jornada_id' },
+            { api: 'health_provider_id', bd: 'healthProviderId', excel: 'prevision' },
+            { api: 'pension_fund_id', bd: 'pensionFundId', excel: 'afp' },
+            { api: 'jornada_group_id', bd: 'jornadaGroupId', excel: 'jornada' },
             { api: 'address', bd: 'address', excel: 'direccion' },
             { api: 'role', bd: 'position', excel: 'cargo' },
             { api: 'status', bd: 'status', excel: 'estado' },
@@ -515,7 +516,7 @@ const registry = {
             { api: 'rule_type', bd: 'ruleType', excel: 'tipo' },
             { api: 'value', bd: 'value', excel: 'valor' },
             { api: 'applies_to', bd: 'appliesTo', excel: 'aplica_a' },
-            { api: 'target_id', bd: 'targetId', excel: 'objetivo_id' },
+            { api: 'target_id', bd: 'targetId', excel: 'objetivo' },
             { api: 'is_active', bd: 'isActive', excel: 'activo' },
             { api: 'is_archived', bd: 'isArchived', excel: 'archivado' },
             { api: 'created_at', bd: 'createdAt', excel: 'fecha_creacion' }
@@ -704,7 +705,7 @@ const registry = {
             { api: 'number', bd: 'number', excel: 'numero' },
             { api: 'location', bd: 'location', excel: 'ubicacion' },
             { api: 'is_handicapped', bd: 'isHandicapped', excel: 'discapacitado' },
-            { api: 'department_id', bd: 'departmentId', excel: 'departamento_id' },
+            { api: 'department_id', bd: 'departmentId', excel: 'unidad' },
             { api: 'is_archived', bd: 'isArchived', excel: 'archivado' }
         ],
         relations: {
@@ -876,13 +877,13 @@ const registry = {
         isMaster: true,
         fields: [
             { api: 'id', bd: 'id', excel: 'id' },
-            { api: 'tower_id', bd: 'towerId', excel: 'torre_id' },
+            { api: 'tower_id', bd: 'towerId', excel: 'torre' },
             { api: 'number', bd: 'number', excel: 'numero' },
             { api: 'floor', bd: 'floor', excel: 'piso' },
-            { api: 'unit_type_id', bd: 'unitTypeId', excel: 'tipo_unidad_id' },
+            { api: 'unit_type_id', bd: 'unitTypeId', excel: 'tipo_unidad' },
             { api: 'm2', bd: 'm2', excel: 'm2' },
-            { api: 'owner_id', bd: 'ownerId', excel: 'propietario_id' },
-            { api: 'resident_id', bd: 'residentId', excel: 'residente_id' }
+            { api: 'owner_id', bd: 'ownerId', excel: 'propietario' },
+            { api: 'resident_id', bd: 'residentId', excel: 'residente' }
         ],
         relations: {
             tower: 'torres',

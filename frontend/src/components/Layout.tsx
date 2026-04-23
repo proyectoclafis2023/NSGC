@@ -448,12 +448,7 @@ export const Layout: React.FC = () => {
 
                     <div className="flex items-center gap-4">
 
-                        <button
-                            onClick={toggleTheme}
-                            className="p-2 rounded-xl text-gray-400 border border-[var(--border-color)] hover:text-indigo-600 hover:bg-[var(--card-bg)] hover:shadow-lg transition-all duration-300 flex items-center gap-2"
-                        >
-                            {settings.theme === 'dark' ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-indigo-600" />}
-                        </button>
+
                         <div className="lg:hidden w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-sm">
                             {user?.name?.charAt(0)}
                         </div>

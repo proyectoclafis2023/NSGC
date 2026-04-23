@@ -64,7 +64,7 @@ export const ConfiguracionPage: React.FC = () => {
     const [doctor_cooldown_min, setDoctorCooldownMin] = useState(settings.doctor_cooldown_min ?? 15);
     const [doctor_webhook_url, setDoctorWebhookUrl] = useState(settings.doctor_webhook_url || '');
 
-    const [isDarkMode, setIsDarkMode] = useState(settings.darkMode || false);
+
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState('');
 
@@ -139,7 +139,8 @@ export const ConfiguracionPage: React.FC = () => {
                 doctor_threshold_error: Number(doctor_threshold_error),
                 doctor_cooldown_min: Number(doctor_cooldown_min),
                 doctor_webhook_url,
-                darkMode: isDarkMode
+                darkMode: true,
+                theme: 'dark'
             };
 
             // Solo enviar contraseñas si han sido explícitamente modificadas (detección real y normalizada)
@@ -239,16 +240,7 @@ Esta acción borrará TODOS los datos maestros y operativos de la plataforma:
                                 <SettingsIcon className="w-5 h-5 text-gray-400" />
                                 <h3 className="font-semibold text-gray-900 dark:text-white">Personalización Visual</h3>
                             </div>
-                            <div className="flex items-center space-x-3 bg-white dark:bg-gray-800 p-1.5 rounded-lg border border-gray-100 dark:border-gray-700 shadow-inner">
-                                <span className="text-[10px] font-black text-gray-400 uppercase ml-2">Modo Oscuro</span>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsDarkMode(!isDarkMode)}
-                                    className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors focus:outline-none ${isDarkMode ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'}`}
-                                >
-                                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${isDarkMode ? 'translate-x-[22px]' : 'translate-x-1'}`} />
-                                </button>
-                            </div>
+
                         </div>
 
                         <form onSubmit={handleSave} className="p-6 space-y-8">

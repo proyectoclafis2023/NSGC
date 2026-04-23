@@ -4,17 +4,6 @@
 
 @layer base {
   :root {
-    --app-bg: #f8fafc;
-    --card-bg: #ffffff;
-    --sidebar-bg: #ffffff;
-    --border-color: #f1f5f9;
-    --text-primary: #0f172a;
-    --text-secondary: #64748b;
-    --accent: #4f46e5;
-    --header-bg: rgba(255, 255, 255, 0.8);
-  }
-
-  .dark {
     --app-bg: #020617; /* Deepest Midnight Blue */
     --card-bg: #0f172a; /* Slate 900 */
     --sidebar-bg: #0f172a;
@@ -22,6 +11,18 @@
     --text-primary: #f8fafc; /* Slate 50 */
     --text-secondary: #94a3b8; /* Slate 400 */
     --accent: #6366f1; /* Indigo 500 */
+    --header-bg: rgba(15, 23, 42, 0.8);
+  }
+
+  .dark {
+    /* Same as root for consistency in Night Mode only deployment */
+    --app-bg: #020617;
+    --card-bg: #0f172a;
+    --sidebar-bg: #0f172a;
+    --border-color: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent: #6366f1;
     --header-bg: rgba(15, 23, 42, 0.8);
   }
 

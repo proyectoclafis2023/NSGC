@@ -94,10 +94,10 @@ model Department {
   ContratistaVisita     ContratistaVisita[]
   correspondence        Correspondence[]
   DailyReport           DailyReport[]
-  tower                 Tower?                 @relation(fields: [towerId], references: [id])
-  unitType              TipoUnidad?            @relation(fields: [unitTypeId], references: [id])
-  owner                 Propietario?           @relation(fields: [ownerId], references: [id])
   resident              Residente?             @relation(fields: [residentId], references: [id])
+  owner                 Propietario?           @relation(fields: [ownerId], references: [id])
+  unitType              TipoUnidad?            @relation(fields: [unitTypeId], references: [id])
+  tower                 Tower?                 @relation(fields: [towerId], references: [id])
   parking               Estacionamiento[]
   Visita                Visita[]
 
@@ -197,11 +197,11 @@ model Personnel {
   roleId                      String?
   articleDeliveries           EntregaArticulo[]
   reports                     DailyReport[]
-  roleRef                     Role?             @relation(fields: [roleId], references: [id])
-  bank                        Banco?            @relation(fields: [bankId], references: [id])
-  healthProvider              HealthProvider?   @relation(fields: [healthProviderId], references: [id])
-  pensionFund                 PensionFund?      @relation(fields: [pensionFundId], references: [id])
   jornadaGroup                JornadaGroup?     @relation(fields: [jornadaGroupId], references: [id])
+  pensionFund                 PensionFund?      @relation(fields: [pensionFundId], references: [id])
+  healthProvider              HealthProvider?   @relation(fields: [healthProviderId], references: [id])
+  bank                        Banco?            @relation(fields: [bankId], references: [id])
+  roleRef                     Role?             @relation(fields: [roleId], references: [id])
   supplyRequests              SupplyRequest[]
 }
 
@@ -226,8 +226,8 @@ model Permission {
 model RolePermission {
   roleId       String
   permissionId String
-  permission   Permission @relation(fields: [permissionId], references: [id])
   role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
 
   @@id([roleId, permissionId])
 }
@@ -236,7 +236,7 @@ model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
   action    String
-  severity  String   @default("LOW") // LOW | MEDIUM | HIGH
+  severity  String   @default("LOW")
   entity    String?
   endpoint  String?
   method    String?
@@ -390,8 +390,8 @@ model CommonExpensePayment {
   createdAt             DateTime       @default(now())
   fundContributionsJson String?
   isArchived            Boolean        @default(false)
-  commonExpense         CommonExpense? @relation(fields: [commonExpenseId], references: [id])
   department            Department     @relation(fields: [departmentId], references: [id])
+  commonExpense         CommonExpense? @relation(fields: [commonExpenseId], references: [id])
 }
 
 /// @module maestro_fondos
@@ -554,45 +554,42 @@ model Payment {
 
 /// @module configuracion
 model SystemSettings {
-  id                    String   @id @default(cuid())
-  systemName            String   @default("SGC - Gestión de Condominios")
-  systemIcon            String   @default("S")
-  systemLogo            String?
-  systemFavicon         String?
-  cameraBackupDays      Int      @default(7)
-  darkMode              Boolean  @default(false)
-  theme                 String   @default("light")
-  adminName             String   @default("")
-  adminRut              String   @default("")
-  condoRut              String   @default("")
-  condoAddress          String   @default("")
-  adminPhone            String   @default("")
-  adminSignature        String?
-  deletionPassword      String   @default("")
-  vacationAccrualRate   Float    @default(1.25)
-  smtpHost              String?
-  smtpPort              Int?
-  smtpUser              String?
-  smtpPassword          String?
-  smtpFrom              String?
-  smtpBcc               String?
-  conciergeEmail        String?
-  emailTriggers         String?
-  paymentDeadlineDay    Int      @default(5)
-  maxArrearsMonths      Int      @default(3)
-  arrearsFineAmount     Float    @default(0)
-  arrearsFinePercentage Float    @default(0)
-  censusFrequencyYears  Int      @default(1)
-  
-  // System Doctor (v3.5.0+)
-  doctorAlertEnabled      Boolean  @default(true)
-  doctorThresholdWarning  Int      @default(90)
-  doctorThresholdError    Int      @default(70)
-  doctorCooldownMin       Int      @default(15)
-  doctorWebhookUrl        String?
-  
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                     String   @id @default(cuid())
+  systemName             String   @default("SGC - Gestión de Condominios")
+  systemIcon             String   @default("S")
+  systemLogo             String?
+  systemFavicon          String?
+  cameraBackupDays       Int      @default(7)
+  darkMode               Boolean  @default(false)
+  theme                  String   @default("light")
+  adminName              String   @default("")
+  adminRut               String   @default("")
+  condoRut               String   @default("")
+  condoAddress           String   @default("")
+  adminPhone             String   @default("")
+  adminSignature         String?
+  deletionPassword       String   @default("")
+  vacationAccrualRate    Float    @default(1.25)
+  smtpHost               String?
+  smtpPort               Int?
+  smtpUser               String?
+  smtpPassword           String?
+  smtpFrom               String?
+  smtpBcc                String?
+  conciergeEmail         String?
+  emailTriggers          String?
+  paymentDeadlineDay     Int      @default(5)
+  maxArrearsMonths       Int      @default(3)
+  arrearsFineAmount      Float    @default(0)
+  arrearsFinePercentage  Float    @default(0)
+  censusFrequencyYears   Int      @default(1)
+  doctorAlertEnabled     Boolean  @default(true)
+  doctorThresholdWarning Int      @default(90)
+  doctorThresholdError   Int      @default(70)
+  doctorCooldownMin      Int      @default(15)
+  doctorWebhookUrl       String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
 /// @module entregas_articulos
@@ -653,28 +650,28 @@ model BulkUploadLog {
 }
 
 model MassUploadLog {
-  id                String   @id @default(cuid())
-  userId            String?
-  timestamp         DateTime @default(now())
-  summaryJson       String   // Resumen detallado (métricas, analytics)
-  errorsJson        String?  // Errores detallados de la sesión
-  executedDataJson  String?  // Snapshot final del dataset ejecutado
-  datasetHash       String?  // Hash SHA-256 para prevenir duplicados
-  status            String   // success, failed, warning
-  executionTimeMs   Int
-  modulesProcessed  String   // Lista de módulos procesados
-  isDryRun          Boolean  @default(false)
+  id               String   @id @default(cuid())
+  userId           String?
+  timestamp        DateTime @default(now())
+  summaryJson      String
+  errorsJson       String?
+  executedDataJson String?
+  datasetHash      String?
+  status           String
+  executionTimeMs  Int
+  modulesProcessed String
+  isDryRun         Boolean  @default(false)
 
   @@map("mass_upload_logs")
 }
 
 model SystemDoctorLog {
-  id                String   @id @default(cuid())
-  timestamp         DateTime @default(now())
-  reportJson        String   // Diagnóstico completo en JSON
-  status            String   // OK, WARNING, ERROR
-  schemaVersion     String
-  summary           String?  // Resumen breve (JSON)
+  id            String   @id @default(cuid())
+  timestamp     DateTime @default(now())
+  reportJson    String
+  status        String
+  schemaVersion String
+  summary       String?
 
   @@map("system_doctor_logs")
 }
@@ -746,10 +743,10 @@ model DailyReport {
   ownerId                    String?
   departmentId               String?
   personnelId                String?
-  Personnel                  Personnel?   @relation(fields: [personnelId], references: [id])
-  department                 Department?  @relation(fields: [departmentId], references: [id])
-  owner                      Propietario? @relation(fields: [ownerId], references: [id])
   resident                   Residente?   @relation(fields: [residentId], references: [id])
+  owner                      Propietario? @relation(fields: [ownerId], references: [id])
+  department                 Department?  @relation(fields: [departmentId], references: [id])
+  Personnel                  Personnel?   @relation(fields: [personnelId], references: [id])
   logs                       ShiftLog[]
 
   @@map("DailyReport")
@@ -789,8 +786,8 @@ model Visita {
   notes           String?
   isArchived      Boolean     @default(false)
   createdAt       DateTime    @default(now())
-  department      Department? @relation(fields: [departmentId], references: [id])
   resident        Residente?  @relation(fields: [residentId], references: [id])
+  department      Department? @relation(fields: [departmentId], references: [id])
 
   @@map("Visitor")
 }
@@ -857,8 +854,8 @@ model Reserva {
   status        String       @default("pending")
   isArchived    Boolean      @default(false)
   createdAt     DateTime     @default(now())
-  resident      Residente    @relation(fields: [residentId], references: [id])
   commonSpace   EspacioComun @relation(fields: [commonSpaceId], references: [id])
+  resident      Residente    @relation(fields: [residentId], references: [id])
 
   @@map("Reservation")
 }

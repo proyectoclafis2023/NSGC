@@ -199,17 +199,17 @@ export const Dashboard: React.FC = () => {
 
     const today = new Date().toISOString().split('T')[0];
     const todayReservations = reservations.filter((r: Reservation) => r.status === 'approved' && r.date === today).length;
-    const todayContractors = contractorVisits.filter((c: ContractorVisit) => c.created_at && c.created_at.startsWith(today) && c.status !== 'exited').length;
+    const todayContractors = contractorVisits.filter((c: ContractorVisit) => c.created_at?.startsWith(today) && c.status !== 'exited').length;
     const currentMonth = new Date().getMonth(); // 0-indexed
     const currentYear = new Date().getFullYear();
 
     const todayVisitors = visitors.filter((v: Visitor) => v.visitDate === today).length;
     const todayDeliveries = correspondence.filter((i: Correspondence) => i.status === 'received' && i.receivedAt?.startsWith(today)).length;
 
-    const monthVisitors = visitors.filter((v: Visitor) => v.visitDate.startsWith(`${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}`)).length;
+    const monthVisitors = visitors.filter((v: Visitor) => v.visitDate?.startsWith(`${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}`)).length;
     const monthDeliveries = correspondence.filter((i: Correspondence) => i.receivedAt?.startsWith(`${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}`)).length;
 
-    const monthShifts = shiftReports.filter((sr: ShiftReport) => sr.shiftDate.startsWith(`${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}`));
+    const monthShifts = shiftReports.filter((sr: ShiftReport) => sr.shiftDate?.startsWith(`${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}`));
     const closedMonthShifts = monthShifts.filter((sr: ShiftReport) => sr.status === 'closed').length;
     // Expected shifts: 3 per day until today
     const daysPassed = new Date().getDate();
