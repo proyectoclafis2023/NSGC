@@ -1,19 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSystemMessages } from '../context/SystemMessageContext';
 import { Button } from '../components/Button';
 import { Plus, Trash2, Edit2, X, Bell, Eye, EyeOff, MessageSquare, Bookmark, Camera, Youtube } from 'lucide-react';
 import type { SystemMessage } from '../types';
 
 export const VisorPage: React.FC = () => {
-    const { messages, addMessage, updateMessage, deleteMessage, toggleMessageStatus } = useSystemMessages();
+    const { messages, addMessage, updateMessage, deleteMessage, toggleMessageStatus, refreshMessages } = useSystemMessages();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMessage, setEditingMessage] = useState<SystemMessage | null>(null);
+
+    // Always refresh when the page is opened to guarantee the list is populated
+    useEffect(() => {
+        refreshMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const [text, setText] = useState('');
     const [type, setType] = useState<SystemMessage['type']>('info');
     const [expires_at, setExpiresAt] = useState('');
     const [tagInput, setTagInput] = useState('');
     const [tags, setTags] = useState<string[]>([]);
+    const [formError, setFormError] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
     // Novedades
     const [image, setImage] = useState<string | undefined>(undefined);
@@ -50,6 +58,7 @@ export const VisorPage: React.FC = () => {
             setDurationSeconds(5);
             setIsFullImage(false);
         }
+        setFormError(null);
         setIsModalOpen(true);
     };
 
@@ -71,10 +80,12 @@ export const VisorPage: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setFormError(null);
+        setIsSaving(true);
         const data = {
             text,
             type,
-            expires_at,
+            expires_at: expires_at ? `${expires_at}T23:59:59.999Z` : null,
             tags,
             is_active: true,
             image,
@@ -82,12 +93,19 @@ export const VisorPage: React.FC = () => {
             duration_seconds,
             is_full_image
         };
-        if (editingMessage) {
-            await updateMessage({ ...editingMessage, ...data });
-        } else {
-            await addMessage(data);
+        try {
+            if (editingMessage) {
+                await updateMessage({ ...editingMessage, ...data });
+            } else {
+                await addMessage(data);
+            }
+            setIsModalOpen(false);
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Error al guardar el mensaje';
+            setFormError(msg);
+        } finally {
+            setIsSaving(false);
         }
-        setIsModalOpen(false);
     };
 
     const addTag = () => {
@@ -341,9 +359,19 @@ export const VisorPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-                                <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-                                <Button type="submit">Guardar Notificación</Button>
+                            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800 flex-col">
+                                {formError && (
+                                    <div className="flex items-start gap-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 text-red-700 dark:text-red-400 text-sm">
+                                        <X className="w-4 h-4 shrink-0 mt-0.5" />
+                                        <span>{formError}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-end gap-3">
+                                    <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
+                                    <Button type="submit" disabled={isSaving}>
+                                        {isSaving ? 'Guardando...' : 'Guardar Notificación'}
+                                    </Button>
+                                </div>
                             </div>
                         </form>
                     </div>

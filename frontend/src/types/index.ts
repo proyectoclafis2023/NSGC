@@ -663,6 +663,7 @@ export interface SystemMessageContextType {
     updateMessage: (message: SystemMessage) => Promise<void>;
     deleteMessage: (id: string) => Promise<void>;
     toggleMessageStatus: (id: string) => Promise<void>;
+    refreshMessages: () => Promise<void>;
 }
 
 export interface DirectedMessage {

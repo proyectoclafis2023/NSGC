@@ -413,7 +413,7 @@ const registry = {
             { api: 'duration_seconds', bd: 'durationSeconds', excel: 'duracion_segundos' },
             { api: 'is_full_image', bd: 'isFullImage', excel: 'imagen_completa' },
             { api: 'expires_at', bd: 'expiresAt', excel: 'fecha_expiracion' },
-            { api: 'tags', bd: 'tags', excel: 'etiquetas' },
+            { api: 'tags', bd: 'tags', excel: 'etiquetas', isJson: true },
             { api: 'is_archived', bd: 'isArchived', excel: 'archivado' },
             { api: 'created_at', bd: 'createdAt', excel: 'fecha_creacion' }
         ]

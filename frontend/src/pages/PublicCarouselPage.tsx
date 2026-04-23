@@ -7,10 +7,16 @@ import { Bell, ShieldAlert, Info, CheckCircle2, AlertTriangle, Clock, Calendar, 
 import type { SystemMessage } from '../types';
 
 export const PublicCarouselPage: React.FC = () => {
-    const { messages } = useSystemMessages();
+    const { messages, refreshMessages } = useSystemMessages();
     const { settings } = useSettings();
     const { spaces } = useCommonSpaces();
     const { reservations } = useReservations();
+
+    // Fetch fresh data on mount (this page opens in a new tab)
+    useEffect(() => {
+        refreshMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -24,14 +30,14 @@ export const PublicCarouselPage: React.FC = () => {
         return resDate >= today && resDate <= nextWeek;
     }).sort((a, b) => new Date(`${a.date}T${a.start_time}`).getTime() - new Date(`${b.date}T${b.start_time}`).getTime());
 
-    const activeMessages = messages.filter(m => m.isActive && !m.is_archived);
+    const activeMessages = messages.filter(m => m.is_active && !m.is_archived);
     if (upcomingReservations.length > 0) {
         activeMessages.push({
             id: 'virtual-reservations',
             text: 'Reservas de la Semana',
             type: 'info',
-            durationSeconds: 12,
-            isActive: true,
+            duration_seconds: 12,
+            is_active: true,
             created_at: new Date().toISOString()
         } as SystemMessage);
     }
@@ -47,7 +53,7 @@ export const PublicCarouselPage: React.FC = () => {
             return;
         }
 
-        const currentDuration = (activeMessages[currentIndex]?.durationSeconds || 8) * 1000;
+        const currentDuration = (activeMessages[currentIndex]?.duration_seconds || 8) * 1000;
         const timer = setTimeout(() => {
             setCurrentIndex((prev) => (prev + 1) % activeMessages.length);
         }, currentDuration);
@@ -120,7 +126,7 @@ export const PublicCarouselPage: React.FC = () => {
 
     const currentMsg = activeMessages[currentIndex];
     const assets = getMessageAssets(currentMsg.type);
-    const ytUrl = getYoutubeEmbedUrl(currentMsg.youtubeUrl);
+    const ytUrl = getYoutubeEmbedUrl(currentMsg.youtube_url);
 
     return (
         <div className={`min-h-screen ${assets.bg} flex flex-col transition-colors duration-1000 text-white overflow-hidden relative`}>
@@ -184,7 +190,7 @@ export const PublicCarouselPage: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                ) : currentMsg.isFullImage && currentMsg.image ? (
+                ) : currentMsg.is_full_image && currentMsg.image ? (
                     <div className="absolute inset-0 animate-in fade-in zoom-in-105 duration-1000">
                         <img src={currentMsg.image} alt="Full Screen" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 p-12 flex flex-col justify-end">
@@ -270,7 +276,7 @@ export const PublicCarouselPage: React.FC = () => {
                     key={`${currentIndex}-${activeMessages.length}`}
                     className="absolute bottom-0 left-0 h-2 bg-white/40 z-20"
                     style={{
-                        animation: `progressLoop ${activeMessages[currentIndex]?.durationSeconds || 8}s linear forwards`
+                        animation: `progressLoop ${activeMessages[currentIndex]?.duration_seconds || 8}s linear forwards`
                     }}
                 />
             )}

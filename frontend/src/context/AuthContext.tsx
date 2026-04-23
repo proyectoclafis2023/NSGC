@@ -42,6 +42,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     isAuthenticated: true,
                     user: data.user
                 });
+                // Notify all providers that auth is ready so they can fetch their data
+                window.dispatchEvent(new CustomEvent('auth-ready'));
                 return true;
             }
             return false;
@@ -86,6 +88,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     isAuthenticated: true,
                     user: data.user
                 });
+                window.dispatchEvent(new CustomEvent('auth-ready'));
                 return true;
             }
             return false;

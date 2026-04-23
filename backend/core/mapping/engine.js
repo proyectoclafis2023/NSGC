@@ -24,9 +24,10 @@ const toCamelCase = (entityKey, payload, source = 'api') => {
             delete result[sourceKey];
             
             if (value !== null) {
-                // 1. Validar formato de decimales (Sólo para API)
+                // 1. Validar formato de decimales (Sólo para API, sólo en strings cortos que no sean base64/URL/JSON)
                 if (source === 'api' && typeof value === 'string') {
-                    if (value.includes(',')) {
+                    const isLikelyData = value.startsWith('data:') || value.startsWith('http') || value.length > 500 || field.isJson;
+                    if (!isLikelyData && value.includes(',')) {
                         throw new Error(`[FORMAT ERROR] El campo '${sourceKey}' contiene una coma (,). Usa punto (.) para decimales.`);
                     }
                 }
